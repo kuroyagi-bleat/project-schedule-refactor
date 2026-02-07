@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Back-Scheduler</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="gantt.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1>Project Back-Scheduler</h1>
+                <div class="timeline-selector">
+                    <select id="timeline-select"></select>
+                    <button id="add-timeline-btn" class="icon-btn" title="追加">+</button>
+                    <button id="rename-timeline-btn" class="icon-btn" title="リネーム">✎</button>
+                    <button id="delete-timeline-btn" class="icon-btn" title="削除">×</button>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button id="save-btn" class="btn-secondary">Save</button>
+                <button id="load-btn" class="btn-secondary">Load</button>
+                <button id="settings-toggle-btn" class="icon-btn" title="Settings">⚙</button>
+                <input type="file" id="file-input" accept=".json" style="display:none">
+            </div>
+        </header>
+
+        <!-- SETTINGS PANEL (Hidden by default) -->
+        <div id="global-settings-panel" class="settings-panel" style="display:none;">
+            <div class="settings-content">
+                <h3>Settings</h3>
+                <div class="form-group">
+                    <label>祝日・休日 (YYYY-MM-DD)</label>
+                    <span class="form-hint">※土日は自動で除外</span>
+                    <textarea id="holidays-input" placeholder="2024-12-31&#10;2025-01-01"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANCHOR DATE BAR -->
+        <div class="anchor-bar">
+            <div class="anchor-group">
+                <label>📌 基準日</label>
+                <input type="date" id="anchor-date-input">
+                <span class="anchor-hint">※Phase Steps内で基準工程を選択</span>
+            </div>
+            <!-- 下位互換用: hidden -->
+            <select id="anchor-phase-select" style="display:none;"></select>
+            <input type="radio" name="top-anchor-type" value="start" style="display:none;">
+            <input type="radio" name="top-anchor-type" value="end" style="display:none;" checked>
+        </div>
+
+        <!-- WORK AREA -->
+        <div class="grid-layout">
+
+            <!-- LEFT: SCHEDULE RESULT -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Schedule</h3>
+                    <div class="card-actions">
+                        <button id="copy-text-btn" class="btn-small">Copy</button>
+                        <button id="sort-toggle-btn" class="btn-small"><span>昇順 ↓</span></button>
+                    </div>
+                </div>
+                <div id="result-container"></div>
+            </div>
+
+            <!-- RIGHT: PHASES INPUT -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Phase Steps</h3>
+                </div>
+                <div id="phase-list"></div>
+                <button id="add-phase-btn" class="add-btn">+ Add Step</button>
+            </div>
+
+        </div>
+
+        <!-- GANTT CHART -->
+        <div class="card gantt-card">
+            <div class="card-header">
+                <h3>Gantt Chart</h3>
+                <button id="export-image-btn" class="btn-small">Save Image</button>
+            </div>
+            <div id="gantt-container"></div>
+        </div>
+
+    </div>
+
+    <!-- ES Modules -->
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>
