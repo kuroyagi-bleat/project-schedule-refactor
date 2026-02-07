@@ -20,8 +20,8 @@
 - [x] 動作検証
 
 ## Phase 3: 機能強化 (Enhancement)
-- [ ] Undo/Redo実装
-- [ ] キーボードショートカット
+- [x] Undo/Redo実装
+- [x] キーボードショートカット
 
 ## Phase 4: リリース (Release)
 - [ ] GitHub登録

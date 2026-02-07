@@ -52,7 +52,12 @@ export function loadState() {
                 });
             }
 
-            appState = parsed;
+            // Object.assignで既存参照を維持（ESM対応）
+            Object.assign(appState, {
+                activeTimelineId: parsed.activeTimelineId,
+                globalHolidays: parsed.globalHolidays || [],
+                timelines: parsed.timelines
+            });
             if (!appState.timelines || !Array.isArray(appState.timelines)) throw new Error("Invalid structure");
             if (!appState.globalHolidays) appState.globalHolidays = [];
 
@@ -69,7 +74,8 @@ export function loadState() {
             const holidays = oldData.holidays || [];
             if (oldData.holidays) delete oldData.holidays;
 
-            appState = {
+            // Object.assignで既存参照を維持（ESM対応）
+            Object.assign(appState, {
                 activeTimelineId: newId,
                 globalHolidays: holidays,
                 timelines: [{
@@ -77,7 +83,7 @@ export function loadState() {
                     name: 'Default Timeline',
                     data: oldData
                 }]
-            };
+            });
             validateTimelineData(appState.timelines[0].data);
             saveState();
         } catch (e) {
@@ -135,4 +141,17 @@ export function getActiveData() {
  */
 export function updateAppState(newState) {
     appState = newState;
+}
+
+/**
+ * 履歴から状態を復元（Undo/Redo用）
+ * @param {Object} restoredState - 復元する状態
+ */
+export function restoreState(restoredState) {
+    appState.activeTimelineId = restoredState.activeTimelineId;
+    appState.globalHolidays = restoredState.globalHolidays || [];
+    appState.timelines = restoredState.timelines || [];
+
+    // LocalStorageにも保存
+    localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(appState));
 }

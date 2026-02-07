@@ -1,8 +1,9 @@
 // main.js - 初期化とイベント登録
 // Phase 1: コード基盤整備
+// Phase 3: Undo/Redo + キーボードショートカット
 
 import { CONFIG, createDefaultTimelineData } from './config.js';
-import { appState, loadState, saveState, getActiveData, getActiveTimeline } from './state.js';
+import { appState, loadState, saveState, getActiveData, getActiveTimeline, restoreState } from './state.js';
 import {
     bindDOMElements,
     getDOMElements,
@@ -14,9 +15,22 @@ import {
 } from './ui.js';
 import { renderGantt, setScheduleUpdateCallback } from './gantt.js';
 import { calculateSchedule } from './scheduler.js';
+import { pushHistory, undo, redo, canUndo, canRedo, getHistoryState } from './history.js';
 
 // circular dependency を解決するためのコールバック設定
 setScheduleUpdateCallback(renderSchedule);
+
+/**
+ * 全UIを再描画
+ */
+function renderAll() {
+    renderTimelineSelect();
+    renderPhases();
+    renderSchedule();
+    renderGantt();
+    updateTopControls();
+    updateUndoRedoButtons();
+}
 
 /**
  * スケジュールを更新（再描画）
@@ -24,6 +38,54 @@ setScheduleUpdateCallback(renderSchedule);
 function updateSchedule() {
     renderSchedule();
     renderGantt();
+}
+
+/**
+ * 状態変更時に履歴を保存
+ */
+function saveWithHistory() {
+    saveState();
+    pushHistory(appState);
+    updateUndoRedoButtons();
+}
+
+/**
+ * Undo/Redoボタンの有効/無効を更新
+ */
+function updateUndoRedoButtons() {
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+
+    if (undoBtn) {
+        undoBtn.disabled = !canUndo();
+        undoBtn.style.opacity = canUndo() ? '1' : '0.4';
+    }
+    if (redoBtn) {
+        redoBtn.disabled = !canRedo();
+        redoBtn.style.opacity = canRedo() ? '1' : '0.4';
+    }
+}
+
+/**
+ * Undoを実行
+ */
+function performUndo() {
+    const previousState = undo();
+    if (previousState) {
+        restoreState(previousState);
+        renderAll();
+    }
+}
+
+/**
+ * Redoを実行
+ */
+function performRedo() {
+    const nextState = redo();
+    if (nextState) {
+        restoreState(nextState);
+        renderAll();
+    }
 }
 
 /**
@@ -156,7 +218,7 @@ function attachPhaseListeners() {
                 return;
             }
             data.phases.splice(idx, 1);
-            saveState();
+            saveWithHistory();
             renderPhases();
             updateSchedule();
         }
@@ -234,7 +296,7 @@ function attachTopListeners() {
         addPhaseBtn.addEventListener('click', () => {
             const data = getActiveData();
             data.phases.push({ id: Date.now().toString(), name: 'New Phase', days: 5 });
-            saveState();
+            saveWithHistory();
             renderPhases();
             updateSchedule();
         });
@@ -419,17 +481,93 @@ function initUI() {
     loadState();
     bindDOMElements();
 
+    // 初期状態を履歴に保存
+    pushHistory(appState);
+
     renderTimelineSelect();
     renderPhases();
     updateSchedule();
     updateTopControls();
+    updateUndoRedoButtons();
 
     attachTimelineListeners();
     attachPhaseListeners();
     attachTopListeners();
+    attachKeyboardShortcuts();
+    attachUndoRedoListeners();
+}
+
+/**
+ * キーボードショートカットを設定
+ */
+function attachKeyboardShortcuts() {
+    document.addEventListener('keydown', (e) => {
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+        const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+        if (!ctrlOrCmd) return;
+
+        // Ctrl/Cmd + Z: Undo
+        if (e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            performUndo();
+        }
+        // Ctrl/Cmd + Shift + Z: Redo
+        else if (e.key === 'z' && e.shiftKey) {
+            e.preventDefault();
+            performRedo();
+        }
+        // Ctrl/Cmd + Y: Redo (Windows style)
+        else if (e.key === 'y') {
+            e.preventDefault();
+            performRedo();
+        }
+        // Ctrl/Cmd + S: Save
+        else if (e.key === 's') {
+            e.preventDefault();
+            saveToFile();
+        }
+        // Ctrl/Cmd + N: New Phase
+        else if (e.key === 'n') {
+            e.preventDefault();
+            addNewPhase();
+        }
+    });
+}
+
+/**
+ * 新規フェーズを追加
+ */
+function addNewPhase() {
+    const data = getActiveData();
+    const newPhase = {
+        id: Date.now().toString(),
+        name: "New Phase",
+        days: 5
+    };
+    data.phases.push(newPhase);
+    saveWithHistory();
+    renderPhases();
+    updateSchedule();
+}
+
+/**
+ * Undo/Redoボタンのイベントリスナー
+ */
+function attachUndoRedoListeners() {
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+
+    if (undoBtn) {
+        undoBtn.addEventListener('click', performUndo);
+    }
+    if (redoBtn) {
+        redoBtn.addEventListener('click', performRedo);
+    }
 }
 
 // アプリケーション開始
 document.addEventListener('DOMContentLoaded', () => {
     initUI();
 });
+
