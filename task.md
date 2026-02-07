@@ -24,5 +24,9 @@
 - [x] キーボードショートカット
 
 ## Phase 4: リリース (Release)
-- [ ] GitHub登録
+- [/] GitHub登録準備
+    - [ ] feature/phase3 を master にマージ
+    - [ ] README.md 作成
+    - [ ] .gitignore 確認・整備
 - [ ] ドキュメント整備
+    - [ ] v1.1.0 タグ付け
