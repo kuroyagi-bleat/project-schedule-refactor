@@ -81,6 +81,7 @@ export function renderGantt() {
     canvas.style.position = 'relative';
 
     // ヘッダー描画
+    const LABEL_WIDTH = 120;  // 工程名ラベルの幅（先に定義）
     const header = document.createElement('div');
     header.className = 'gantt-header';
     header.style.display = 'flex';
@@ -88,6 +89,17 @@ export function renderGantt() {
     header.style.top = '0';
     header.style.zIndex = '10';
     header.style.backgroundColor = '#1e293b';
+
+    // ラベル列のプレースホルダー
+    const labelPlaceholder = document.createElement('div');
+    labelPlaceholder.className = 'gantt-header-label';
+    labelPlaceholder.style.width = `${LABEL_WIDTH}px`;
+    labelPlaceholder.style.minWidth = `${LABEL_WIDTH}px`;
+    labelPlaceholder.style.fontSize = '0.65rem';
+    labelPlaceholder.style.padding = '0.25rem 0.5rem';
+    labelPlaceholder.style.color = 'var(--text-muted)';
+    labelPlaceholder.textContent = '工程名';
+    header.appendChild(labelPlaceholder);
 
     gridCols.forEach((col) => {
         const cell = document.createElement('div');
@@ -107,14 +119,66 @@ export function renderGantt() {
 
     canvas.appendChild(header);
 
-    // 行描画
+    // 行描画（LABEL_WIDTHはヘッダー部分で定義済み）
     allData.forEach(group => {
+        // スプリントタイトル行
+        const titleRow = document.createElement('div');
+        titleRow.className = 'gantt-row gantt-sprint-title';
+        titleRow.style.height = '28px';
+        titleRow.style.position = 'relative';
+        titleRow.style.marginTop = '8px';
+        titleRow.style.marginBottom = '4px';
+        titleRow.style.display = 'flex';
+        titleRow.style.alignItems = 'center';
+        titleRow.style.background = 'rgba(56, 189, 248, 0.15)';
+        titleRow.style.borderRadius = '4px';
+
+        const titleLabel = document.createElement('div');
+        titleLabel.className = 'gantt-sprint-label';
+        titleLabel.style.width = `${LABEL_WIDTH}px`;
+        titleLabel.style.minWidth = `${LABEL_WIDTH}px`;
+        titleLabel.style.paddingLeft = '0.5rem';
+        titleLabel.style.fontWeight = 'bold';
+        titleLabel.style.fontSize = '0.8rem';
+        titleLabel.style.color = 'var(--accent-primary)';
+        titleLabel.style.overflow = 'hidden';
+        titleLabel.style.textOverflow = 'ellipsis';
+        titleLabel.style.whiteSpace = 'nowrap';
+        titleLabel.textContent = `📌 ${escapeHtml(group.info.name)}`;
+        titleRow.appendChild(titleLabel);
+
+        canvas.appendChild(titleRow);
+
+        // 各フェーズの行
         group.schedule.forEach(item => {
             const row = document.createElement('div');
             row.className = 'gantt-row';
             row.style.height = '32px';
             row.style.position = 'relative';
             row.style.marginBottom = '4px';
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+
+            // 工程名ラベル（左側固定）
+            const label = document.createElement('div');
+            label.className = 'gantt-phase-label';
+            label.style.width = `${LABEL_WIDTH}px`;
+            label.style.minWidth = `${LABEL_WIDTH}px`;
+            label.style.paddingLeft = '0.75rem';
+            label.style.fontSize = '0.75rem';
+            label.style.color = 'var(--text-secondary)';
+            label.style.overflow = 'hidden';
+            label.style.textOverflow = 'ellipsis';
+            label.style.whiteSpace = 'nowrap';
+            label.textContent = escapeHtml(item.name);
+            row.appendChild(label);
+
+            // バーコンテナ（相対位置の基準）
+            const barContainer = document.createElement('div');
+            barContainer.className = 'gantt-bar-container';
+            barContainer.style.position = 'relative';
+            barContainer.style.flex = '1';
+            barContainer.style.height = '100%';
 
             const dayOffset = getDaysDiff(minDate, item.startDate) - 1;
             const barWidth = getDaysDiff(item.startDate, item.endDate);
@@ -154,7 +218,8 @@ export function renderGantt() {
                 bar.style.background = 'rgba(255,255,255,0.2)';
             }
 
-            bar.textContent = escapeHtml(item.name);
+            // バー内のテキストは日数を表示（工程名は左ラベルに移動したため）
+            bar.textContent = `${item.days}日`;
 
             // リサイズハンドル
             const handle = document.createElement('div');
@@ -169,7 +234,8 @@ export function renderGantt() {
             handle.style.cursor = 'col-resize';
             bar.appendChild(handle);
 
-            row.appendChild(bar);
+            barContainer.appendChild(bar);
+            row.appendChild(barContainer);
             canvas.appendChild(row);
         });
     });
