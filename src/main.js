@@ -143,6 +143,56 @@ function showConfirm(message) {
 }
 
 /**
+ * カスタムアラートダイアログを表示（OKボタンのみ）
+ * @param {string} message - 表示メッセージ
+ * @returns {Promise<void>}
+ */
+function showAlert(message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirm-modal');
+        const messageEl = document.getElementById('confirm-message');
+        const okBtn = document.getElementById('confirm-ok-btn');
+        const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+        // 初期化（キャンセルボタンを非表示）
+        messageEl.textContent = message;
+        cancelBtn.style.display = 'none';
+        modal.style.display = 'flex';
+
+        // フォーカスをOKボタンに
+        setTimeout(() => okBtn.focus(), 50);
+
+        // クリーンアップ関数
+        const cleanup = () => {
+            modal.style.display = 'none';
+            cancelBtn.style.display = '';  // 元に戻す
+            okBtn.onclick = null;
+        };
+
+        // OKボタン
+        okBtn.onclick = () => {
+            cleanup();
+            resolve();
+        };
+
+        // オーバーレイクリックでも閉じる
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                okBtn.click();
+            }
+        };
+
+        // Enterキーで閉じる
+        document.addEventListener('keydown', function keyHandler(e) {
+            if (e.key === 'Enter' || e.key === 'Escape') {
+                document.removeEventListener('keydown', keyHandler);
+                okBtn.click();
+            }
+        });
+    });
+}
+
+/**
  * 全UIを再描画
  */
 function renderAll() {
@@ -266,7 +316,7 @@ function attachTimelineListeners() {
             e.preventDefault();
             e.stopPropagation();
             if (appState.timelines.length <= 1) {
-                alert("最後のスプリントは削除できません。");
+                await showAlert("最後のスプリントは削除できません。");
                 return;
             }
             const confirmed = await showConfirm(`"${getActiveTimeline().name}" を削除しますか？`);
