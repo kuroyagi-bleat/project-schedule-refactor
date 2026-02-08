@@ -90,14 +90,19 @@ export function renderGantt() {
     header.style.zIndex = '10';
     header.style.backgroundColor = '#1e293b';
 
-    // ラベル列のプレースホルダー
+    // ラベル列のプレースホルダー（sticky固定）
     const labelPlaceholder = document.createElement('div');
     labelPlaceholder.className = 'gantt-header-label';
+    labelPlaceholder.style.position = 'sticky';
+    labelPlaceholder.style.left = '0';
+    labelPlaceholder.style.zIndex = '15';
     labelPlaceholder.style.width = `${LABEL_WIDTH}px`;
     labelPlaceholder.style.minWidth = `${LABEL_WIDTH}px`;
     labelPlaceholder.style.fontSize = '0.65rem';
     labelPlaceholder.style.padding = '0.25rem 0.5rem';
     labelPlaceholder.style.color = 'var(--text-muted)';
+    labelPlaceholder.style.backgroundColor = '#1e293b';
+    labelPlaceholder.style.borderRight = '1px solid var(--border-color)';
     labelPlaceholder.textContent = '工程名';
     header.appendChild(labelPlaceholder);
 
@@ -126,12 +131,9 @@ export function renderGantt() {
         titleRow.className = 'gantt-row gantt-sprint-title';
         titleRow.style.height = '28px';
         titleRow.style.position = 'relative';
-        titleRow.style.marginTop = '8px';
-        titleRow.style.marginBottom = '4px';
         titleRow.style.display = 'flex';
         titleRow.style.alignItems = 'center';
         titleRow.style.background = 'rgba(56, 189, 248, 0.15)';
-        titleRow.style.borderRadius = '4px';
 
         const titleLabel = document.createElement('div');
         titleLabel.className = 'gantt-sprint-label';
@@ -140,11 +142,15 @@ export function renderGantt() {
         titleLabel.style.zIndex = '5';
         titleLabel.style.width = `${LABEL_WIDTH}px`;
         titleLabel.style.minWidth = `${LABEL_WIDTH}px`;
+        titleLabel.style.height = '100%';
+        titleLabel.style.display = 'flex';
+        titleLabel.style.alignItems = 'center';
         titleLabel.style.paddingLeft = '0.5rem';
         titleLabel.style.fontWeight = 'bold';
         titleLabel.style.fontSize = '0.8rem';
         titleLabel.style.color = 'var(--accent-primary)';
         titleLabel.style.backgroundColor = 'var(--bg-secondary)';
+        titleLabel.style.borderRight = '1px solid var(--border-color)';
         titleLabel.style.overflow = 'hidden';
         titleLabel.style.textOverflow = 'ellipsis';
         titleLabel.style.whiteSpace = 'nowrap';
