@@ -50,17 +50,12 @@
             </div>
         </div>
 
-        <!-- ANCHOR DATE BAR -->
-        <div class="anchor-bar">
-            <div class="anchor-group">
-                <label>📌 基準日</label>
-                <input type="date" id="anchor-date-input">
-                <span class="anchor-hint">※Phase Steps内で基準工程を選択</span>
-            </div>
-            <!-- 下位互換用: hidden -->
-            <select id="anchor-phase-select" style="display:none;"></select>
-            <input type="radio" name="top-anchor-type" value="start" style="display:none;">
-            <input type="radio" name="top-anchor-type" value="end" style="display:none;" checked>
+        <!-- ANCHOR DATE BAR - REMOVED, moved to Phase Steps header -->
+        <!-- 下位互換用: hidden -->
+        <div style="display:none;">
+            <select id="anchor-phase-select"></select>
+            <input type="radio" name="top-anchor-type" value="start">
+            <input type="radio" name="top-anchor-type" value="end" checked>
         </div>
 
         <!-- WORK AREA -->
@@ -80,8 +75,15 @@
 
             <!-- RIGHT: PHASES INPUT -->
             <div class="card">
-                <div class="card-header">
-                    <h3>Phase Steps</h3>
+                <div class="card-header phase-steps-header">
+                    <div class="phase-steps-title">
+                        <h3>Phase Steps</h3>
+                        <span id="current-sprint-name" class="sprint-name-badge"></span>
+                    </div>
+                    <div class="anchor-controls">
+                        <label class="anchor-label">📌 基準日</label>
+                        <input type="date" id="anchor-date-input" class="anchor-date-input">
+                    </div>
                 </div>
                 <div id="phase-list"></div>
                 <button id="add-phase-btn" class="add-btn">+ Add Step</button>

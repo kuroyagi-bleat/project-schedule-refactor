@@ -42,7 +42,7 @@
     position: absolute;
     height: 24px;
     border-radius: 4px;
-    background: var(--accent-primary);
+    background: linear-gradient(135deg, var(--accent-primary) 0%, #0ea5e9 100%);
     top: 8px;
     /* (40 - 24) / 2 */
     display: flex;
@@ -61,7 +61,8 @@
 .gantt-bar:hover {
     filter: brightness(1.1);
     z-index: 5;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
+    transform: scaleY(1.1);
 }
 
 .gantt-grid-lines {
@@ -99,9 +100,11 @@
 .gantt-bar {
     cursor: grab;
 }
+
 .gantt-bar:active {
     cursor: grabbing;
 }
+
 .resize-handle {
     position: absolute;
     right: 0;
@@ -113,6 +116,7 @@
     border-radius: 0 4px 4px 0;
     transition: background 0.2s;
 }
+
 .resize-handle:hover {
-    background: rgba(255,255,255,0.4);
+    background: rgba(255, 255, 255, 0.4);
 }

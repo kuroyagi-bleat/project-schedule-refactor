@@ -12,8 +12,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - キーボードショートカット（Cmd/Ctrl+Z/Y/S/N）
   - Undo/Redoボタンをヘッダーに追加
 
+- **Phase 5: UI/UX改善**
+  - 基準日をPhase Stepsパネル右上に移動
+  - スプリント名バッジを追加（Phase Steps横）
+  - Schedule列のホバーエフェクト追加
+  - ガントチャートバーにグラデーション追加
+  - レスポンシブ対応強化
+
+### Changed
+- 完了ラジオボタンを終了日の前に配置変更
+
 ### Fixed
 - ESM参照問題を`Object.assign`使用で修正
+
+### Deferred
+- ダークモード/ライトモード切替（スコープ外として見送り）
 
 ## [1.0.0] - 2026-02-08
 

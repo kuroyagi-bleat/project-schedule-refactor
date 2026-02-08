@@ -216,6 +216,45 @@ body {
 }
 
 /* ===================================
+   PHASE STEPS HEADER
+   =================================== */
+.phase-steps-header {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.phase-steps-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.sprint-name-badge {
+    background: var(--accent-primary);
+    color: var(--bg-primary);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.anchor-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-left: auto;
+}
+
+.anchor-label {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+}
+
+.anchor-date-input {
+    width: 140px;
+}
+
+/* ===================================
    FORM ELEMENTS
    =================================== */
 input[type="date"],
@@ -336,6 +375,26 @@ button:hover {
     .anchor-bar {
         flex-wrap: wrap;
     }
+
+    .phase-steps-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: var(--space-sm);
+    }
+
+    .anchor-controls {
+        margin-left: 0;
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .phase-anchor-dates {
+        flex-wrap: wrap;
+    }
+
+    .phase-row {
+        flex-wrap: wrap;
+    }
 }
 
 /* ===================================
@@ -348,11 +407,18 @@ button:hover {
     padding: var(--space-sm);
     margin-bottom: var(--space-xs);
     border-radius: 4px;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    border-left: 3px solid transparent;
 }
 
 .phase-row:hover {
     background: var(--bg-hover);
+}
+
+/* アンカー行のハイライト */
+.phase-row.is-anchor {
+    background: rgba(56, 189, 248, 0.1);
+    border-left-color: var(--accent-primary);
 }
 
 .phase-handle {
@@ -491,6 +557,13 @@ button:hover {
     padding-left: var(--space-md);
     padding-bottom: var(--space-md);
     position: relative;
+    transition: all 0.2s ease;
+    border-radius: 0 4px 4px 0;
+}
+
+.timeline-item:hover {
+    background: var(--bg-hover);
+    transform: translateX(4px);
 }
 
 .timeline-item::before {
@@ -502,6 +575,11 @@ button:hover {
     height: 6px;
     border-radius: 50%;
     background: var(--accent-secondary);
+    transition: transform 0.2s ease;
+}
+
+.timeline-item:hover::before {
+    transform: scale(1.5);
 }
 
 .timeline-title {

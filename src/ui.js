@@ -143,13 +143,13 @@ export function renderPhases() {
                 </label>
                 <input type="date" class="phase-start-input" data-idx="${index}" value="${startDateVal}" ${!isParallel ? 'disabled' : ''}>
                 <span class="date-separator">-</span>
-                <input type="date" class="phase-end-input" data-idx="${index}" value="${endDateVal}" ${!isParallel ? 'disabled' : ''}>
                 <label class="anchor-radio" title="この日付を完了基準に設定">
                     <input type="radio" name="anchor-select" class="anchor-end-radio" 
                            data-phase-id="${phase.id}" data-anchor-type="end" 
                            ${isAnchorEnd ? 'checked' : ''} ${isParallel ? 'disabled' : ''}>
                     <span class="anchor-label">完了</span>
                 </label>
+                <input type="date" class="phase-end-input" data-idx="${index}" value="${endDateVal}" ${!isParallel ? 'disabled' : ''}>
             </div>
 
             <div class="phase-days">
@@ -194,6 +194,13 @@ export function updateTopControls() {
     }
     if (holidaysInput) {
         holidaysInput.value = (appState.globalHolidays || []).join('\n');
+    }
+
+    // スプリント名バッジを更新
+    const sprintNameBadge = document.getElementById('current-sprint-name');
+    if (sprintNameBadge) {
+        const activeTimeline = appState.timelines.find(t => t.id === appState.activeTimelineId);
+        sprintNameBadge.textContent = activeTimeline ? activeTimeline.name : '';
     }
 }
 
