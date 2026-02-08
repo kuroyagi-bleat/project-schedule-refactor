@@ -24,6 +24,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 - ESM参照問題を`Object.assign`使用で修正
+- **シークレットモードでダイアログが消える問題**: ネイティブ`prompt`/`confirm`/`alert`をカスタムHTMLモーダルに置き換え
 
 ### Deferred
 - ダークモード/ライトモード切替（スコープ外として見送り）
