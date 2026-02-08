@@ -7,7 +7,6 @@
 
 .gantt-header {
     display: flex;
-    margin-bottom: 0.5rem;
     position: relative;
     /* was sticky, caused scroll issues? */
     /* top: 0; */
