@@ -73,15 +73,17 @@ export function renderGantt() {
         });
     }
 
+
+    const LABEL_WIDTH = 120;  // 工程名ラベルの幅
+
     // キャンバス作成
     const canvas = document.createElement('div');
     canvas.className = 'gantt-canvas';
-    canvas.style.width = `${totalDays * PX_PER_DAY}px`;
+    canvas.style.width = `${LABEL_WIDTH + totalDays * PX_PER_DAY}px`;
     canvas.style.minWidth = '100%';
     canvas.style.position = 'relative';
 
     // ヘッダー描画
-    const LABEL_WIDTH = 120;  // 工程名ラベルの幅（先に定義）
     const header = document.createElement('div');
     header.className = 'gantt-header';
     header.style.display = 'flex';
