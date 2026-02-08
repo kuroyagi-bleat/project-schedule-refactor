@@ -208,7 +208,7 @@ export function renderGantt() {
             bar.dataset.id = item.id;
             bar.dataset.timelineId = group.info.id;
             bar.style.position = 'absolute';
-            bar.style.left = `${LABEL_WIDTH + dayOffset * PX_PER_DAY}px`;
+            bar.style.left = `${dayOffset * PX_PER_DAY}px`;
             bar.style.width = `${barWidth * PX_PER_DAY}px`;
             bar.style.height = '28px';
             bar.style.top = '2px';
