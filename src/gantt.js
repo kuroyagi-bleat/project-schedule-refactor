@@ -208,7 +208,7 @@ export function renderGantt() {
             bar.dataset.id = item.id;
             bar.dataset.timelineId = group.info.id;
             bar.style.position = 'absolute';
-            bar.style.left = `${dayOffset * PX_PER_DAY}px`;
+            bar.style.left = `${LABEL_WIDTH + dayOffset * PX_PER_DAY}px`;
             bar.style.width = `${barWidth * PX_PER_DAY}px`;
             bar.style.height = '28px';
             bar.style.top = '2px';
@@ -271,6 +271,13 @@ export function renderGantt() {
     gridOverlay.style.display = 'flex';
     gridOverlay.style.zIndex = '0';
     gridOverlay.style.pointerEvents = 'none';
+
+    // グリッド線のオフセット（工程名ラベル分）
+    const gridOffset = document.createElement('div');
+    gridOffset.style.width = `${LABEL_WIDTH}px`;
+    gridOffset.style.height = '100%';
+    gridOffset.style.flexShrink = '0';
+    gridOverlay.appendChild(gridOffset);
 
     gridCols.forEach((col) => {
         const line = document.createElement('div');
