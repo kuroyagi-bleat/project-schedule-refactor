@@ -135,12 +135,16 @@ export function renderGantt() {
 
         const titleLabel = document.createElement('div');
         titleLabel.className = 'gantt-sprint-label';
+        titleLabel.style.position = 'sticky';
+        titleLabel.style.left = '0';
+        titleLabel.style.zIndex = '5';
         titleLabel.style.width = `${LABEL_WIDTH}px`;
         titleLabel.style.minWidth = `${LABEL_WIDTH}px`;
         titleLabel.style.paddingLeft = '0.5rem';
         titleLabel.style.fontWeight = 'bold';
         titleLabel.style.fontSize = '0.8rem';
         titleLabel.style.color = 'var(--accent-primary)';
+        titleLabel.style.backgroundColor = 'var(--bg-secondary)';
         titleLabel.style.overflow = 'hidden';
         titleLabel.style.textOverflow = 'ellipsis';
         titleLabel.style.whiteSpace = 'nowrap';
@@ -159,14 +163,18 @@ export function renderGantt() {
             row.style.display = 'flex';
             row.style.alignItems = 'center';
 
-            // 工程名ラベル（左側固定）
+            // 工程名ラベル（左側sticky固定）
             const label = document.createElement('div');
             label.className = 'gantt-phase-label';
+            label.style.position = 'sticky';
+            label.style.left = '0';
+            label.style.zIndex = '5';
             label.style.width = `${LABEL_WIDTH}px`;
             label.style.minWidth = `${LABEL_WIDTH}px`;
             label.style.paddingLeft = '0.75rem';
             label.style.fontSize = '0.75rem';
             label.style.color = 'var(--text-secondary)';
+            label.style.backgroundColor = 'var(--bg-secondary)';
             label.style.overflow = 'hidden';
             label.style.textOverflow = 'ellipsis';
             label.style.whiteSpace = 'nowrap';
