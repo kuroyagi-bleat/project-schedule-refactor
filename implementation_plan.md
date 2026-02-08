@@ -1,68 +1,42 @@
-# Phase 3 実装計画書: 機能強化
+# Chrome拡張機能化 (Phase 6) 実装計画
 
-<!-- Approved -->
-> **Approved by**: wakaumekenji
-> **Date**: 2026-02-08 02:07
-> **Phase**: Implementation Plan
+## 目標
+現在のWebアプリケーションをChrome拡張機能としてパッケージ化し、ブラウザのツールバーからワンクリックで全画面表示（新規タブ）できるようにする。
 
-**作成日**: 2026-02-08
-**ブランチ**: `feature/phase3-enhancements`
+## 方針
+- **Manifest V3** 準拠
+- `src` ディレクトリを拡張機能のルートディレクトリとして利用
+- **Action起動**: アイコンクリック時に `index.html` を新規タブで開く
 
----
+## 変更内容
 
-## 目的
+### 1. [NEW] `src/manifest.json`
+拡張機能の定義ファイル。
+- `manifest_version`: 3
+- `name`: "Project Schedule Refactor" (仮)
+- `version`: "1.0.0"
+- `action`: クリックイベントをフックするため空設定、またはデフォルトポップアップなし
+- `background`: Service Worker (`background.js`)
 
-ユーザビリティ向上のため、Undo/Redo機能とキーボードショートカットを追加する。
+### 2. [NEW] `src/background.js`
+アイコンクリックイベントを監視し、タブを開く。
+```javascript
+chrome.action.onClicked.addListener((tab) => {
+  chrome.tabs.create({
+    url: "index.html"
+  });
+});
+```
 
----
+### 3. [NEW] `src/icons/`
+アイコン画像（16, 48, 128px）。
 
-## 3-1. Undo/Redo 機能
-
-### 設計
-- **履歴スタック**: 状態のスナップショットを配列で保持
-- **最大履歴数**: 50件（メモリ節約）
-- **対象操作**: フェーズ追加/削除/編集、アンカー変更、日数変更
-
-### ファイル変更
-
-#### [NEW] `src/history.js`
-- `pushHistory(state)` - 履歴追加
-- `undo()` / `redo()` - 復元
-- `canUndo()` / `canRedo()` - 状態確認
-
-#### [MODIFY] `src/main.js`
-- 状態変更時に `pushHistory()` を呼び出し
-- Undo/Redoイベントリスナー追加
-
-#### [MODIFY] `src/index.html`
-- Undo/Redoボタン追加（ヘッダー）
-
----
-
-## 3-2. キーボードショートカット
-
-| ショートカット | アクション |
-|:---|:---|
-| `Ctrl/Cmd + Z` | Undo |
-| `Ctrl/Cmd + Shift + Z` | Redo |
-| `Ctrl/Cmd + S` | Save |
-| `Ctrl/Cmd + N` | 新規フェーズ追加 |
-
-### ファイル変更
-
-#### [MODIFY] `src/main.js`
-- `keydown` イベントリスナー追加
-- ショートカットハンドラー実装
-
----
+## 留意点
+- **データ保存場所**: `localStorage` は `chrome-extension://[ID]/` ドメイン下に保存されます。現在の `localhost` のデータは引き継がれません（手動エクスポート/インポートが必要）。
+- **CSP (Content Security Policy)**: 外部スクリプト（CDN等）は原則禁止ですが、現在はローカルファイルのみで構成されているため問題ありません。
 
 ## 検証方法
-
-1. フェーズ編集後、Ctrl+Z でUndo
-2. Ctrl+Shift+Z でRedo
-3. Ctrl+N で新規フェーズ追加
-4. 履歴上限(50件)の動作確認
-
----
-
-> **次のアクション**: この計画書の承認後、実装を開始します。
+1. Chromeの `chrome://extensions` を開く
+2. 「デベロッパーモード」をON
+3. 「パッケージ化されていない拡張機能を読み込む」で `src` ディレクトリを選択
+4. アイコンが表示されるか、クリックしてアプリが開くか確認
