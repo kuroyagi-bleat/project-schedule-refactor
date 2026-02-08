@@ -159,7 +159,6 @@ export function renderGantt() {
             row.className = 'gantt-row';
             row.style.height = '32px';
             row.style.position = 'relative';
-            row.style.marginBottom = '4px';
             row.style.display = 'flex';
             row.style.alignItems = 'center';
 
@@ -171,10 +170,15 @@ export function renderGantt() {
             label.style.zIndex = '5';
             label.style.width = `${LABEL_WIDTH}px`;
             label.style.minWidth = `${LABEL_WIDTH}px`;
+            label.style.height = '100%';
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
             label.style.paddingLeft = '0.75rem';
+            label.style.paddingRight = '0.5rem';
             label.style.fontSize = '0.75rem';
             label.style.color = 'var(--text-secondary)';
             label.style.backgroundColor = 'var(--bg-secondary)';
+            label.style.borderRight = '1px solid var(--border-color)';
             label.style.overflow = 'hidden';
             label.style.textOverflow = 'ellipsis';
             label.style.whiteSpace = 'nowrap';
