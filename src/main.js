@@ -477,12 +477,17 @@ function importJson(file) {
 /**
  * UIを初期化
  */
+// リスナー登録済みフラグ（イベントリスナーの重複登録を防ぐ）
+let listenersAttached = false;
+
 function initUI() {
     loadState();
     bindDOMElements();
 
-    // 初期状態を履歴に保存
-    pushHistory(appState);
+    // 初期状態を履歴に保存（初回のみ）
+    if (!listenersAttached) {
+        pushHistory(appState);
+    }
 
     renderTimelineSelect();
     renderPhases();
@@ -490,11 +495,15 @@ function initUI() {
     updateTopControls();
     updateUndoRedoButtons();
 
-    attachTimelineListeners();
-    attachPhaseListeners();
-    attachTopListeners();
-    attachKeyboardShortcuts();
-    attachUndoRedoListeners();
+    // イベントリスナーは初回のみ登録
+    if (!listenersAttached) {
+        attachTimelineListeners();
+        attachPhaseListeners();
+        attachTopListeners();
+        attachKeyboardShortcuts();
+        attachUndoRedoListeners();
+        listenersAttached = true;
+    }
 }
 
 /**
