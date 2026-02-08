@@ -103,7 +103,9 @@ function attachTimelineListeners() {
     }
 
     if (addTimelineBtn) {
-        addTimelineBtn.onclick = () => {
+        addTimelineBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const name = prompt("新しいタイムラインの名前を入力:", `Sprint ${appState.timelines.length + 1}`);
             if (!name) return;
 
@@ -121,7 +123,9 @@ function attachTimelineListeners() {
     }
 
     if (renameTimelineBtn) {
-        renameTimelineBtn.onclick = () => {
+        renameTimelineBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const active = getActiveTimeline();
             const newName = prompt("タイムラインの名前を変更:", active.name);
             if (newName) {
@@ -133,7 +137,9 @@ function attachTimelineListeners() {
     }
 
     if (deleteTimelineBtn) {
-        deleteTimelineBtn.onclick = () => {
+        deleteTimelineBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             if (appState.timelines.length <= 1) {
                 alert("最後のタイムラインは削除できません。");
                 return;
