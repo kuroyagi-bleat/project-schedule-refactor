@@ -20,6 +20,128 @@ import { pushHistory, undo, redo, canUndo, canRedo, getHistoryState } from './hi
 // circular dependency を解決するためのコールバック設定
 setScheduleUpdateCallback(renderSchedule);
 
+// ===================================
+// カスタムモーダルダイアログ（ネイティブprompt/confirmの代替）
+// ===================================
+
+/**
+ * カスタムプロンプトダイアログを表示
+ * @param {string} title - ダイアログタイトル
+ * @param {string} defaultValue - デフォルト値
+ * @returns {Promise<string|null>} - 入力値またはnull（キャンセル時）
+ */
+function showPrompt(title, defaultValue = '') {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('custom-modal');
+        const titleEl = document.getElementById('modal-title');
+        const inputEl = document.getElementById('modal-input');
+        const okBtn = document.getElementById('modal-ok-btn');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+
+        // 初期化
+        titleEl.textContent = title;
+        inputEl.value = defaultValue;
+        modal.style.display = 'flex';
+
+        // フォーカスを入力欄に
+        setTimeout(() => inputEl.focus(), 50);
+
+        // クリーンアップ関数
+        const cleanup = () => {
+            modal.style.display = 'none';
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+            inputEl.onkeydown = null;
+        };
+
+        // OKボタン
+        okBtn.onclick = () => {
+            const value = inputEl.value.trim();
+            cleanup();
+            resolve(value || null);
+        };
+
+        // キャンセルボタン
+        cancelBtn.onclick = () => {
+            cleanup();
+            resolve(null);
+        };
+
+        // Enterキーで確定、Escapeでキャンセル
+        inputEl.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                okBtn.click();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                cancelBtn.click();
+            }
+        };
+
+        // オーバーレイクリックでキャンセル
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                cancelBtn.click();
+            }
+        };
+    });
+}
+
+/**
+ * カスタム確認ダイアログを表示
+ * @param {string} message - 確認メッセージ
+ * @returns {Promise<boolean>} - true（OK）またはfalse（キャンセル）
+ */
+function showConfirm(message) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('confirm-modal');
+        const messageEl = document.getElementById('confirm-message');
+        const okBtn = document.getElementById('confirm-ok-btn');
+        const cancelBtn = document.getElementById('confirm-cancel-btn');
+
+        // 初期化
+        messageEl.textContent = message;
+        modal.style.display = 'flex';
+
+        // フォーカスをキャンセルボタンに（安全側）
+        setTimeout(() => cancelBtn.focus(), 50);
+
+        // クリーンアップ関数
+        const cleanup = () => {
+            modal.style.display = 'none';
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+        };
+
+        // OKボタン
+        okBtn.onclick = () => {
+            cleanup();
+            resolve(true);
+        };
+
+        // キャンセルボタン
+        cancelBtn.onclick = () => {
+            cleanup();
+            resolve(false);
+        };
+
+        // オーバーレイクリックでキャンセル
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                cancelBtn.click();
+            }
+        };
+
+        // キーボード操作
+        document.addEventListener('keydown', function escHandler(e) {
+            if (e.key === 'Escape') {
+                document.removeEventListener('keydown', escHandler);
+                cancelBtn.click();
+            }
+        });
+    });
+}
+
 /**
  * 全UIを再描画
  */
@@ -103,10 +225,13 @@ function attachTimelineListeners() {
     }
 
     if (addTimelineBtn) {
-        addTimelineBtn.onclick = (e) => {
+        addTimelineBtn.onclick = async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const name = prompt("新しいタイムラインの名前を入力:", `Sprint ${appState.timelines.length + 1}`);
+
+            const defaultName = `Sprint ${appState.timelines.length + 1}`;
+            const name = await showPrompt("新しいスプリントの名前を入力", defaultName);
+
             if (!name) return;
 
             const newId = Date.now().toString();
@@ -123,11 +248,11 @@ function attachTimelineListeners() {
     }
 
     if (renameTimelineBtn) {
-        renameTimelineBtn.onclick = (e) => {
+        renameTimelineBtn.onclick = async (e) => {
             e.preventDefault();
             e.stopPropagation();
             const active = getActiveTimeline();
-            const newName = prompt("タイムラインの名前を変更:", active.name);
+            const newName = await showPrompt("スプリント名を変更", active.name);
             if (newName) {
                 active.name = newName;
                 saveState();
@@ -137,14 +262,15 @@ function attachTimelineListeners() {
     }
 
     if (deleteTimelineBtn) {
-        deleteTimelineBtn.onclick = (e) => {
+        deleteTimelineBtn.onclick = async (e) => {
             e.preventDefault();
             e.stopPropagation();
             if (appState.timelines.length <= 1) {
-                alert("最後のタイムラインは削除できません。");
+                alert("最後のスプリントは削除できません。");
                 return;
             }
-            if (!confirm(`"${getActiveTimeline().name}" を削除しますか？`)) return;
+            const confirmed = await showConfirm(`"${getActiveTimeline().name}" を削除しますか？`);
+            if (!confirmed) return;
 
             appState.timelines = appState.timelines.filter(t => t.id !== appState.activeTimelineId);
             appState.activeTimelineId = appState.timelines[0].id;
