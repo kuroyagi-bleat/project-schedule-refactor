@@ -27,7 +27,7 @@
 .gantt-row {
     position: relative;
     height: 40px;
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 0.5px dotted var(--glass-border);
     display: flex;
     /* Just to match width context */
     align-items: center;
