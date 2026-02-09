@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.1.0] - 2026-02-09
 
 ### Added
 - **Phase 3: 機能強化**
@@ -18,14 +18,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Schedule列のホバーエフェクト追加
   - ガントチャートバーにグラデーション追加
   - レスポンシブ対応強化
+  - 表示モード（Web/Extension）に対応
+
+- **Phase 6: Chrome拡張機能**
+  - Manifest V3対応 (`manifest.json`)
+  - Service Worker (`background.js`)
+  - アイコン追加
 
 ### Changed
 - 完了ラジオボタンを終了日の前に配置変更
+- `html2canvas` ライブラリをローカル (`src/lib/`) に配置（CSP対応）
 
 ### Fixed
 - ESM参照問題を`Object.assign`使用で修正
 - **シークレットモードでダイアログが消える問題**: ネイティブ`prompt`/`confirm`/`alert`をカスタムHTMLモーダルに置き換え
 - **ガントチャートの描画ズレ**: 工程名ラベル列（120px）によるグリッド線とタスクバーの位置不整合を解消
+- **拡張機能での画像保存エラー**: 外部CDN読み込みを廃止しローカルライブラリを使用
 
 ### Deferred
 - ダークモード/ライトモード切替（スコープ外として見送り）
