@@ -7,7 +7,8 @@ import {
     addBusinessDays,
     ensureWorkingDayBackward,
     ensureWorkingDayForward,
-    getDaysDiff
+    getDaysDiff,
+    getBusinessDaysDiff
 } from './dateUtils.js';
 
 // getDaysDiffをre-export
@@ -39,7 +40,8 @@ export function calculateSchedule(targetData = null) {
         if (p.isParallel) {
             let s = p.manualStartDate ? new Date(p.manualStartDate) : new Date(data.anchorDate);
             let e = p.manualEndDate ? new Date(p.manualEndDate) : addBusinessDays(s, p.days - 1);
-            const diff = getDaysDiff(s, e);
+            const diff = getBusinessDaysDiff(s, e);
+            p.days = diff; // 計算された営業日数をデータに反映
             return { ...p, startDate: s, endDate: e, days: diff };
         }
         return null;

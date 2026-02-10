@@ -15,6 +15,7 @@ import { CONFIG, createDefaultTimelineData, defaultPhaseConfig } from './config.
 export let appState = {
     activeTimelineId: null,
     globalHolidays: [],
+    tags: [], // [NEW] { id, name, color }
     timelines: []
 };
 
@@ -56,10 +57,12 @@ export function loadState() {
             Object.assign(appState, {
                 activeTimelineId: parsed.activeTimelineId,
                 globalHolidays: parsed.globalHolidays || [],
+                tags: parsed.tags || [], // [NEW]
                 timelines: parsed.timelines
             });
             if (!appState.timelines || !Array.isArray(appState.timelines)) throw new Error("Invalid structure");
             if (!appState.globalHolidays) appState.globalHolidays = [];
+            if (!appState.tags) appState.tags = []; // [NEW]
 
         } catch (e) {
             console.error("Failed to parse app state, resetting.", e);
@@ -103,6 +106,7 @@ export function resetToDefault() {
     appState = {
         activeTimelineId: id,
         globalHolidays: [],
+        tags: [],
         timelines: [{
             id: id,
             name: 'Sprint 1',
@@ -119,6 +123,11 @@ export function validateTimelineData(data) {
     if (!data.phases) data.phases = JSON.parse(JSON.stringify(defaultPhaseConfig));
     if (!data.anchorType) data.anchorType = 'end';
     if (!data.sortOrder) data.sortOrder = 'asc';
+
+    // [NEW] Ensure tagIds exists on phases
+    data.phases.forEach(p => {
+        if (!p.tagIds) p.tagIds = [];
+    });
 }
 
 /**
@@ -150,8 +159,98 @@ export function updateAppState(newState) {
 export function restoreState(restoredState) {
     appState.activeTimelineId = restoredState.activeTimelineId;
     appState.globalHolidays = restoredState.globalHolidays || [];
+    appState.tags = restoredState.tags || [];
     appState.timelines = restoredState.timelines || [];
 
     // LocalStorageにも保存
     localStorage.setItem(CONFIG.STORAGE_KEY, JSON.stringify(appState));
+}
+
+/**
+ * 新しいタグを作成
+ * @param {string} name
+ * @param {string} color
+ * @returns {Object} 作成されたタグ
+ */
+export function addTag(name, color) {
+    const newTag = {
+        id: 'tag-' + Date.now(),
+        name,
+        color
+    };
+    appState.tags.push(newTag);
+    saveState();
+    return newTag;
+}
+
+/**
+ * タグを更新
+ * @param {string} id
+ * @param {string} name
+ * @param {string} color
+ */
+export function updateTag(id, name, color) {
+    const tag = appState.tags.find(t => t.id === id);
+    if (tag) {
+        tag.name = name;
+        tag.color = color;
+        saveState();
+    }
+}
+
+/**
+ * タグを削除（使用されているフェーズからも削除）
+ * @param {string} id
+ */
+export function deleteTag(id) {
+    if (!appState.tags) return;
+
+    // グローバル設定から削除
+    appState.tags = appState.tags.filter(t => t.id !== id);
+
+    // 全タイムラインの全フェーズから参照を削除 (activeTimelineだけでなく全て)
+    if (appState.timelines) {
+        appState.timelines.forEach(timeline => {
+            if (timeline.data && timeline.data.phases) {
+                timeline.data.phases.forEach(phase => {
+                    if (phase.tagIds) {
+                        phase.tagIds = phase.tagIds.filter(tagId => tagId !== id);
+                    }
+                });
+            }
+        });
+    }
+    saveState();
+}
+
+/**
+ * フェーズのタグ付与状態をトグル
+ * @param {string} timelineId
+ * @param {string} phaseId
+ * @param {string} tagId
+ * @returns {boolean} 成功したかどうか
+ */
+export function togglePhaseTag(timelineId, phaseId, tagId) {
+    const timeline = appState.timelines.find(t => t.id === timelineId);
+    if (!timeline) return false;
+
+    const phase = timeline.data.phases.find(p => p.id === phaseId);
+    if (!phase) return false;
+
+    if (!phase.tagIds) phase.tagIds = [];
+
+    if (phase.tagIds.includes(tagId)) {
+        // 削除
+        phase.tagIds = phase.tagIds.filter(id => id !== tagId);
+    } else {
+        // 追加（最大3つチェック）
+        if (phase.tagIds.length < 3) {
+            phase.tagIds.push(tagId);
+        } else {
+            console.warn("Max 3 tags allowed");
+            return false;
+        }
+    }
+    saveState();
+    return true;
 }

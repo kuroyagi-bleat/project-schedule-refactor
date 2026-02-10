@@ -437,46 +437,123 @@ button:hover {
     font-weight: 600;
 }
 
+.phase-anchor-dates {
+    display: flex;
+    flex-direction: column;
+    /* Vertical stack of rows */
+    justify-content: center;
+    gap: 4px;
+    margin-right: 4px;
+    /* Reduced from space-md */
+    width: 170px;
+    /* Fixed width to contain date inputs */
+}
+
+.phase-date-row {
+    display: flex;
+    align-items: center;
+    /* justify-content: space-between; Removed to reduce gap */
+    gap: 4px;
+    /* Default gap */
+    width: 100%;
+}
+
 .phase-content {
-    flex: 1;
+    /* Fixed width for Phase Name to reduce space */
+    width: 200px;
+    /* Reduced from original flexible width */
+    flex-shrink: 0;
+    margin-right: var(--space-md);
     display: flex;
     align-items: center;
     gap: var(--space-sm);
 }
 
-.phase-anchor-badge {
-    font-size: var(--font-size-xs);
-    padding: 2px 6px;
-    background: var(--accent-primary);
-    color: var(--bg-primary);
-    border-radius: 3px;
-    font-weight: 500;
+.phase-name-input {
+    width: 100%;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    padding: 4px 8px;
+    transition: all 0.2s;
 }
 
 .phase-parallel {
     display: flex;
     align-items: center;
-    gap: var(--space-xs);
-    font-size: var(--font-size-xs);
-    color: var(--text-muted);
+    gap: 6px;
     cursor: pointer;
-}
-
-.phase-anchor-dates {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
+    margin-right: 4px;
+    /* Reduced from space-md */
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    width: 60px;
+    /* Fixed width */
+    justify-content: center;
 }
 
 .anchor-radio {
     display: flex;
     align-items: center;
-    gap: 2px;
-    cursor: pointer;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    width: 60px;
+    /* Fixed label width */
     padding: 2px 4px;
     border-radius: 3px;
     transition: background 0.15s;
+    cursor: pointer;
 }
+
+.phase-start-input,
+.phase-end-input {
+    /* ... existing styles ... */
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    color: var(--text-primary);
+    padding: 2px 6px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    width: 120px;
+    /* Fixed input width */
+    transition: all 0.2s;
+}
+
+/* Hide the old separator */
+.date-separator {
+    display: none;
+}
+
+/* Always visible tags container */
+.phase-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-right: var(--space-md);
+    flex-grow: 1;
+    /* Take remaining space */
+    min-width: 100px;
+    /* Minimum width */
+    align-items: center;
+}
+
+.phase-days {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    width: 80px;
+    /* Fixed width */
+    justify-content: flex-end;
+    margin-right: var(--space-md);
+}
+
+
 
 .anchor-radio:hover {
     background: var(--bg-hover);
@@ -732,6 +809,114 @@ button:hover {
     transition: background 0.15s;
 }
 
-.modal-footer .btn-secondary:hover {
+
+/* ===================================
+   TAGGING SYSTEM
+   =================================== */
+.tag-badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.tag-badge.small {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+}
+
+.phase-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+    margin-left: 30px;
+    /* Align with content */
+}
+
+/* Settings: Tag Manager */
+.tag-manager-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.tag-item-edit {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
     background: var(--bg-hover);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.tag-color-preview {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tag-add-form {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.color-picker {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+}
+
+/* Tag Selection Modal */
+.tag-selection-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+}
+
+.tag-select-option {
+    cursor: pointer;
+    padding: var(--space-sm);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    text-align: center;
+    transition: all 0.15s;
+    background: var(--bg-primary);
+    font-size: var(--font-size-sm);
+}
+
+.tag-select-option:hover {
+    background: var(--bg-hover);
+}
+
+.tag-select-option.selected {
+    border-color: var(--accent-primary);
+    background: rgba(56, 189, 248, 0.1);
+    font-weight: 600;
+}
+
+/* Header Filter */
+.tag-filter-select {
+    font-size: var(--font-size-sm);
+    padding: 4px 8px;
+    width: 120px;
+}
+
+.row-hidden-by-filter {
+    display: none !important;
 }

@@ -99,3 +99,12 @@
 - [x] バックグラウンドスクリプト作成 (新規タブで開く挙動)
 - [x] 動作検証 (chrome://extensions)
 
+
+## Phase 11: 並行工程の営業日考慮 (Parallel Phase Business Days)
+- [x] 実装計画 (Implementation Plan)
+    - [x] `implementation_plan.md` 作成
+- [x] 実装 (Implementation)
+    - [x] `dateUtils.js`: `getBusinessDaysDiff` 追加
+    - [x] `scheduler.js`: 並行工程計算ロジック修正
+- [x] 検証 (Verification)
+    - [x] 動作確認 (Tests)

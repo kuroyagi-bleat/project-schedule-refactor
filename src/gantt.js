@@ -36,10 +36,18 @@ export function renderGantt() {
 
     // 全タイムラインからスケジュールを収集
     const allData = [];
+    const filterVal = document.getElementById('tag-filter-select')?.value;
+
     appState.timelines.forEach(t => {
-        const sch = calculateSchedule(t.data);
+        let sch = calculateSchedule(t.data);
         if (sch && sch.length) {
-            allData.push({ info: t, schedule: sch });
+            // Filter
+            if (filterVal) {
+                sch = sch.filter(item => item.tagIds && item.tagIds.includes(filterVal));
+            }
+            if (sch.length > 0) {
+                allData.push({ info: t, schedule: sch });
+            }
         }
     });
 

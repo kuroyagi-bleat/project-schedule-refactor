@@ -1,42 +1,34 @@
-# Chrome拡張機能化 (Phase 6) 実装計画
+# 並行工程の営業日考慮 (Parallel Phase Business Days)
 
-## 目標
-現在のWebアプリケーションをChrome拡張機能としてパッケージ化し、ブラウザのツールバーからワンクリックで全画面表示（新規タブ）できるようにする。
+## Goal Description
+並行工程（Parallel Phase）の日数計算において、現在は単純な「暦日（カレンダー通りの日数）」の差分を計算しているため、土日祝日が含まれてしまい、実際の「営業日」数と乖離が生じる問題を修正する。
+具体的には、開始日と終了日の間の営業日のみをカウントするロジックを導入する。
 
-## 方針
-- **Manifest V3** 準拠
-- `src` ディレクトリを拡張機能のルートディレクトリとして利用
-- **Action起動**: アイコンクリック時に `index.html` を新規タブで開く
+## User Review Required
+> [!NOTE]
+> この変更により、既存の並行工程の日数が減る可能性があります（土日祝が含まれていた分が除外されるため）。
 
-## 変更内容
+## Proposed Changes
 
-### 1. [NEW] `src/manifest.json`
-拡張機能の定義ファイル。
-- `manifest_version`: 3
-- `name`: "Project Schedule Refactor" (仮)
-- `version`: "1.0.0"
-- `action`: クリックイベントをフックするため空設定、またはデフォルトポップアップなし
-- `background`: Service Worker (`background.js`)
+### [dateUtils.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/dateUtils.js)
+#### [MODIFY] dateUtils.js
+- `getBusinessDaysDiff(startDate, endDate)` 関数を追加
+    - 開始日と終了日の間の営業日数をカウントする
+    - `isWorkingDay` を利用して判定
 
-### 2. [NEW] `src/background.js`
-アイコンクリックイベントを監視し、タブを開く。
-```javascript
-chrome.action.onClicked.addListener((tab) => {
-  chrome.tabs.create({
-    url: "index.html"
-  });
-});
-```
+### [scheduler.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/scheduler.js)
+#### [MODIFY] scheduler.js
+- `processParallel` 関数内の `getDaysDiff` 呼び出しを `getBusinessDaysDiff` に変更
 
-### 3. [NEW] `src/icons/`
-アイコン画像（16, 48, 128px）。
+## Verification Plan
 
-## 留意点
-- **データ保存場所**: `localStorage` は `chrome-extension://[ID]/` ドメイン下に保存されます。現在の `localhost` のデータは引き継がれません（手動エクスポート/インポートが必要）。
-- **CSP (Content Security Policy)**: 外部スクリプト（CDN等）は原則禁止ですが、現在はローカルファイルのみで構成されているため問題ありません。
+### Automated Tests
+- なし（現状のテストフレームワークがないため）
 
-## 検証方法
-1. Chromeの `chrome://extensions` を開く
-2. 「デベロッパーモード」をON
-3. 「パッケージ化されていない拡張機能を読み込む」で `src` ディレクトリを選択
-4. アイコンが表示されるか、クリックしてアプリが開くか確認
+### Manual Verification
+1. `http://localhost:8080/src/` を開く
+2. 新規フェーズを作成し、「並行」チェックを入れる
+3. 開始日を金曜日、終了日を翌週月曜日に設定（土日を挟む）
+    - **Before**: 4日間と表示される（金・土・日・月）
+    - **After**: 2日間と表示される（金・月）
+4. 祝日を含む期間でテストを行い、祝日が除外されることを確認

@@ -107,3 +107,32 @@ export function ensureWorkingDayForward(date) {
 export function getDaysDiff(d1, d2) {
     return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
 }
+
+/**
+ * 2つの日付間の営業日数を計算（開始日・終了日含む）
+ * @param {Date} d1 - 開始日
+ * @param {Date} d2 - 終了日
+ * @returns {number}
+ */
+export function getBusinessDaysDiff(d1, d2) {
+    // 日付のみで比較するため時刻をクリアした新しいDateオブジェクトを作成
+    const start = new Date(d1);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(d2);
+    end.setHours(0, 0, 0, 0);
+
+    // 開始日 > 終了日の場合は負数を返す（再帰呼び出しで符号反転）
+    if (start > end) {
+        return -1 * getBusinessDaysDiff(end, start);
+    }
+
+    let count = 0;
+    let current = new Date(start);
+    while (current <= end) {
+        if (isWorkingDay(current)) {
+            count++;
+        }
+        current.setDate(current.getDate() + 1);
+    }
+    return count;
+}

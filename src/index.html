@@ -29,6 +29,7 @@
                 </div>
             </div>
             <div class="header-actions">
+
                 <button id="undo-btn" class="icon-btn" title="Undo (Ctrl+Z)">↩</button>
                 <button id="redo-btn" class="icon-btn" title="Redo (Ctrl+Shift+Z)">↪</button>
                 <button id="save-btn" class="btn-secondary">Save</button>
@@ -46,6 +47,18 @@
                     <label>祝日・休日 (YYYY-MM-DD)</label>
                     <span class="form-hint">※土日は自動で除外</span>
                     <textarea id="holidays-input" placeholder="2024-12-31&#10;2025-01-01"></textarea>
+                </div>
+
+                <div class="form-group" style="margin-top:2rem;">
+                    <label>タグ管理 (Global Tags)</label>
+                    <div id="tag-manager-list" class="tag-manager-list">
+                        <!-- Tag items will be rendered here -->
+                    </div>
+                    <div class="tag-add-form">
+                        <input type="text" id="new-tag-name" placeholder="New Tag Name" style="width:150px;">
+                        <input type="color" id="new-tag-color" value="#38bdf8" class="color-picker">
+                        <button id="add-tag-btn" class="btn-small">Add</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -80,10 +93,7 @@
                         <h3>Phase Steps</h3>
                         <span id="current-sprint-name" class="sprint-name-badge"></span>
                     </div>
-                    <div class="anchor-controls">
-                        <label class="anchor-label">📌 基準日</label>
-                        <input type="date" id="anchor-date-input" class="anchor-date-input">
-                    </div>
+
                 </div>
                 <div id="phase-list"></div>
                 <button id="add-phase-btn" class="add-btn">+ Add Step</button>
@@ -95,7 +105,12 @@
         <div class="card gantt-card">
             <div class="card-header">
                 <h3>Gantt Chart</h3>
-                <button id="export-image-btn" class="btn-small">Save Image</button>
+                <div style="display:flex; gap:10px; margin-left: auto;">
+                    <select id="tag-filter-select" class="tag-filter-select">
+                        <option value="">All Tags</option>
+                    </select>
+                    <button id="export-image-btn" class="btn-small">Save Image</button>
+                </div>
             </div>
             <div id="gantt-container"></div>
         </div>
@@ -130,6 +145,25 @@
             <div class="modal-footer">
                 <button type="button" id="confirm-cancel-btn" class="btn-secondary">キャンセル</button>
                 <button type="button" id="confirm-ok-btn" class="btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- タグ選択モーダル -->
+    <div id="tag-selection-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>タグ選択</h3>
+            </div>
+            <div class="modal-body">
+                <p>このフェーズに適用するタグを選択してください（最大3つ）</p>
+                <div id="tag-selection-container" class="tag-selection-grid">
+                    <!-- Options rendered here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="tag-modal-cancel-btn" class="btn-secondary">キャンセル</button>
+                <button type="button" id="tag-modal-ok-btn" class="btn-primary">OK</button>
             </div>
         </div>
     </div>
