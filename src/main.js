@@ -1,9 +1,14 @@
+
 // main.js - 初期化とイベント登録
 // Phase 1: コード基盤整備
 // Phase 3: Undo/Redo + キーボードショートカット
 
 import { CONFIG, createDefaultTimelineData } from './config.js';
-import { appState, loadState, saveState, getActiveData, getActiveTimeline, restoreState } from './state.js';
+import {
+    appState, saveState, loadState, getActiveTimeline, getActiveData,
+    addTag, updateTag, deleteTag, togglePhaseTag,
+    selectPhase, deselectPhase, clearSelection, togglePhaseSelection, getSelectedPhaseIds, setSelection, selectedPhaseIds
+} from './state.js';
 import {
     bindDOMElements,
     getDOMElements,
@@ -16,7 +21,7 @@ import {
     renderTagFilter,  // [NEW]
     openTagSelectionModal // [NEW]
 } from './ui.js';
-import { addTag } from './state.js'; // [NEW]
+
 import { renderGantt, setScheduleUpdateCallback } from './gantt.js';
 import { calculateSchedule } from './scheduler.js';
 import { normalizeDateStr } from './dateUtils.js';
@@ -286,7 +291,7 @@ function attachTimelineListeners() {
             e.preventDefault();
             e.stopPropagation();
 
-            const defaultName = `Sprint ${appState.timelines.length + 1}`;
+            const defaultName = `Sprint ${appState.timelines.length + 1} `;
             const name = await showPrompt("新しいスプリントの名前を入力", defaultName);
 
             if (!name) return;
@@ -344,7 +349,9 @@ function attachPhaseListeners() {
     const { phaseListEl } = getDOMElements();
     if (!phaseListEl) return;
 
-    // イベント委譲でフェーズ操作を処理
+    // ---------------------------------------------------------
+    // 1. 入力値の変更 (Change / Input)
+    // ---------------------------------------------------------
     phaseListEl.addEventListener('change', (e) => {
         const data = getActiveData();
         const idx = parseInt(e.target.dataset.idx);
@@ -354,12 +361,11 @@ function attachPhaseListeners() {
             saveState();
             renderSchedule();
         } else if (e.target.classList.contains('phase-days-input')) {
-            // change イベント（blur時）: 状態保存 + 全更新
             const val = parseInt(e.target.value) || 1;
             data.phases[idx].days = Math.max(1, val);
             saveState();
             updateSchedule();
-            renderPhases(); // blur後なのでフォーカス消失OK
+            renderPhases();
         } else if (e.target.classList.contains('phase-parallel-chk')) {
             const phase = data.phases[idx];
             phase.isParallel = e.target.checked;
@@ -382,7 +388,6 @@ function attachPhaseListeners() {
                 updateSchedule();
                 renderPhases();
             } else {
-                // アンカーフェーズの日付変更（インライン編集）
                 const isAnchorStart = data.anchorPhaseId === phase.id && data.anchorType === 'start';
                 const isAnchorEnd = data.anchorPhaseId === phase.id && data.anchorType === 'end';
                 if ((isAnchorStart && e.target.classList.contains('phase-start-input')) ||
@@ -390,11 +395,10 @@ function attachPhaseListeners() {
                     data.anchorDate = e.target.value;
                     saveState();
                     updateSchedule();
-                    renderPhases(); // 全工程の日付を更新
+                    renderPhases();
                 }
             }
         } else if (e.target.classList.contains('anchor-start-radio') || e.target.classList.contains('anchor-end-radio')) {
-            // アンカーラジオボタンの変更処理
             const phaseId = e.target.dataset.phaseId;
             const anchorType = e.target.dataset.anchorType;
             data.anchorPhaseId = phaseId;
@@ -406,7 +410,6 @@ function attachPhaseListeners() {
         }
     });
 
-    // input イベント: リアルタイム更新（フォーカス維持）
     phaseListEl.addEventListener('input', (e) => {
         const data = getActiveData();
         const idx = parseInt(e.target.dataset.idx);
@@ -414,7 +417,6 @@ function attachPhaseListeners() {
         if (e.target.classList.contains('phase-days-input')) {
             const val = parseInt(e.target.value) || 1;
             data.phases[idx].days = Math.max(1, val);
-            // フォーカスを維持したまま日付だけ更新
             const schedule = calculateSchedule(data);
             if (schedule) {
                 const startInputs = phaseListEl.querySelectorAll('.phase-start-input');
@@ -433,7 +435,11 @@ function attachPhaseListeners() {
         }
     });
 
-    // 削除ボタン
+    // ---------------------------------------------------------
+    // 2. クリック処理 (削除 / タグ / 選択)
+    // ---------------------------------------------------------
+    let lastSelectedPhaseIdx = null;
+
     phaseListEl.addEventListener('click', (e) => {
         if (e.target.closest('.delete-btn')) {
             const idx = parseInt(e.target.closest('.delete-btn').dataset.idx);
@@ -451,42 +457,123 @@ function attachPhaseListeners() {
             saveWithHistory();
             renderPhases();
             updateSchedule();
-        } else if (e.target.closest('.tag-btn')) {
+            return;
+        }
+
+        if (e.target.closest('.tag-btn')) {
             const idx = parseInt(e.target.closest('.tag-btn').dataset.idx);
             openTagSelectionModal(idx);
+            return;
         }
+
+        const row = e.target.closest('.phase-row');
+        if (!row) return;
+
+        if (e.target.tagName === 'INPUT' ||
+            e.target.tagName === 'BUTTON' ||
+            e.target.closest('label')) {
+            return;
+        }
+
+        const idx = parseInt(row.dataset.idx);
+        const data = getActiveData();
+        const phase = data.phases[idx];
+        const id = phase.id;
+
+        if (e.shiftKey && lastSelectedPhaseIdx !== null) {
+            const start = Math.min(lastSelectedPhaseIdx, idx);
+            const end = Math.max(lastSelectedPhaseIdx, idx);
+
+            if (!e.metaKey && !e.ctrlKey) {
+                clearSelection();
+            }
+
+            for (let i = start; i <= end; i++) {
+                const p = data.phases[i];
+                selectPhase(p.id);
+            }
+        } else if (e.metaKey || e.ctrlKey) {
+            togglePhaseSelection(id);
+            lastSelectedPhaseIdx = idx;
+        } else {
+            clearSelection();
+            selectPhase(id);
+            lastSelectedPhaseIdx = idx;
+        }
+        renderPhases();
     });
 
-    // ドラッグ&ドロップ並び替え
-    let draggedIdx = null;
+    // ---------------------------------------------------------
+    // 3. ドラッグ&ドロップ (Multi-DnD)
+    // ---------------------------------------------------------
+    let draggedIndices = [];
 
     phaseListEl.addEventListener('dragstart', (e) => {
-        if (!e.target.classList.contains('draggable-item')) return;
-        draggedIdx = parseInt(e.target.dataset.idx);
-        e.target.style.opacity = '0.5';
+        const row = e.target.closest('.draggable-item');
+        if (!row) return;
+
+        const idx = parseInt(row.dataset.idx);
+        const data = getActiveData();
+        const phase = data.phases[idx];
+
+        if (!selectedPhaseIds.has(phase.id)) {
+            clearSelection();
+            selectPhase(phase.id);
+            lastSelectedPhaseIdx = idx;
+            renderPhases();
+        }
+
+        draggedIndices = [];
+        data.phases.forEach((p, i) => {
+            if (selectedPhaseIds.has(p.id)) {
+                draggedIndices.push(i);
+            }
+        });
+        if (!draggedIndices.includes(idx)) draggedIndices.push(idx);
+        draggedIndices.sort((a, b) => a - b);
+
+        e.dataTransfer.effectAllowed = 'move';
+        row.style.opacity = '0.5';
     });
 
     phaseListEl.addEventListener('dragend', (e) => {
         if (!e.target.classList.contains('draggable-item')) return;
         e.target.style.opacity = '1';
-        draggedIdx = null;
+        draggedIndices = [];
     });
 
     phaseListEl.addEventListener('dragover', (e) => {
         e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
     });
 
     phaseListEl.addEventListener('drop', (e) => {
         e.preventDefault();
         const target = e.target.closest('.draggable-item');
-        if (!target || draggedIdx === null) return;
+        if (!target || draggedIndices.length === 0) return;
 
-        const dropIdx = parseInt(target.dataset.idx);
-        if (draggedIdx === dropIdx) return;
+        const dropTargetIdx = parseInt(target.dataset.idx);
+        if (draggedIndices.includes(dropTargetIdx)) return;
 
         const data = getActiveData();
-        const [moved] = data.phases.splice(draggedIdx, 1);
-        data.phases.splice(dropIdx, 0, moved);
+        const movingItems = [];
+
+        for (let i = draggedIndices.length - 1; i >= 0; i--) {
+            const indexToRemove = draggedIndices[i];
+            movingItems.unshift(data.phases[indexToRemove]);
+            data.phases.splice(indexToRemove, 1);
+        }
+
+        let adjust = 0;
+        draggedIndices.forEach(removedIdx => {
+            if (removedIdx < dropTargetIdx) {
+                adjust++;
+            }
+        });
+        const finalDropIdx = dropTargetIdx - adjust;
+
+        data.phases.splice(finalDropIdx, 0, ...movingItems);
+
         saveState();
         renderPhases();
         updateSchedule();
@@ -582,10 +669,10 @@ function attachTopListeners() {
                 const y = d.getFullYear();
                 const m = String(d.getMonth() + 1).padStart(2, '0');
                 const d_str = String(d.getDate()).padStart(2, '0');
-                return `${y}-${m}-${d_str}`;
+                return `${y} -${m} -${d_str} `;
             };
             list.forEach(item => {
-                text += `${fmt(item.startDate)} ~ ${fmt(item.endDate)}${SEPARATOR}${item.name}${SEPARATOR}${item.days}日\n`;
+                text += `${fmt(item.startDate)} ~${fmt(item.endDate)}${SEPARATOR}${item.name}${SEPARATOR}${item.days} 日\n`;
             });
             navigator.clipboard.writeText(text).then(() => {
                 const originalText = copyBtn.innerHTML;
@@ -672,7 +759,7 @@ if (exportBtn) {
             scale: 2
         }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `gantt-chart-${new Date().toISOString().split('T')[0]}.png`;
+            link.download = `gantt - chart - ${new Date().toISOString().split('T')[0]}.png`;
             link.href = canvas.toDataURL();
             link.click();
 
@@ -695,7 +782,7 @@ function exportJson() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `schedule-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `schedule - backup - ${new Date().toISOString().split('T')[0]}.json`;
     a.click();
 }
 
@@ -839,4 +926,3 @@ function attachUndoRedoListeners() {
 document.addEventListener('DOMContentLoaded', () => {
     initUI();
 });
-

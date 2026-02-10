@@ -3,7 +3,7 @@
 
 
 
-import { appState, getActiveData, getActiveTimeline, saveState, addTag, deleteTag, updateTag, togglePhaseTag } from './state.js';
+import { appState, getActiveData, getActiveTimeline, saveState, addTag, deleteTag, updateTag, togglePhaseTag, selectedPhaseIds } from './state.js';
 import { calculateSchedule, getDaysDiff } from './scheduler.js';
 import { normalizeDateStr } from './dateUtils.js';
 
@@ -96,6 +96,11 @@ export function renderPhases() {
         row.className = 'phase-row draggable-item';
         row.dataset.idx = index;
         row.draggable = true;
+
+        // 選択状態の反映
+        if (selectedPhaseIds.has(phase.id)) {
+            row.classList.add('selected');
+        }
 
 
 

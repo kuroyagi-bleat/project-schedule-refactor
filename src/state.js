@@ -254,3 +254,37 @@ export function togglePhaseTag(timelineId, phaseId, tagId) {
     saveState();
     return true;
 }
+
+/**
+ * 選択中のフェーズID管理（永続化しない）
+ */
+export const selectedPhaseIds = new Set();
+
+export function getSelectedPhaseIds() {
+    return Array.from(selectedPhaseIds);
+}
+
+export function selectPhase(id) {
+    selectedPhaseIds.add(id);
+}
+
+export function deselectPhase(id) {
+    selectedPhaseIds.delete(id);
+}
+
+export function clearSelection() {
+    selectedPhaseIds.clear();
+}
+
+export function togglePhaseSelection(id) {
+    if (selectedPhaseIds.has(id)) {
+        selectedPhaseIds.delete(id);
+    } else {
+        selectedPhaseIds.add(id);
+    }
+}
+
+export function setSelection(ids) {
+    selectedPhaseIds.clear();
+    ids.forEach(id => selectedPhaseIds.add(id));
+}

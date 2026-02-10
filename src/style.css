@@ -917,6 +917,18 @@ button:hover {
     width: 120px;
 }
 
+
 .row-hidden-by-filter {
     display: none !important;
+}
+
+/* 複数選択・ドラッグ */
+.phase-row.selected {
+    background-color: var(--bg-hover) !important;
+    border-left: 3px solid var(--accent-primary) !important;
+}
+
+.phase-row.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
 }
