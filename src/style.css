@@ -917,6 +917,112 @@ button:hover {
     width: 120px;
 }
 
+
 .row-hidden-by-filter {
     display: none !important;
+}
+
+/* 複数選択・ドラッグ */
+.phase-row.selected {
+    background-color: var(--bg-hover) !important;
+    border-left: 3px solid var(--accent-primary) !important;
+}
+
+.phase-row.dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+/* ===================================
+   PRESET MANAGER
+   =================================== */
+.preset-controls {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.preset-list {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: var(--space-xs);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.preset-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) var(--space-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.preset-item:last-child {
+    border-bottom: none;
+}
+
+.preset-item:hover {
+    background: var(--bg-hover);
+}
+
+.preset-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* ===================================
+   SETTINGS LAYOUT REFACTOR
+   =================================== */
+.settings-container {
+    padding: var(--space-xs);
+}
+
+.settings-section {
+    margin-bottom: var(--space-md);
+}
+
+.settings-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.settings-header-row h3 {
+    margin: 0;
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+}
+
+.settings-actions {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.settings-grid-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+}
+
+.settings-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.settings-divider {
+    border: none;
+    border-top: 1px dashed var(--border-color);
+    margin: var(--space-lg) 0;
+}
+
+/* レスポンシブ対応: 狭い画面では1カラムに */
+@media (max-width: 768px) {
+    .settings-grid-2col {
+        grid-template-columns: 1fr;
+    }
 }

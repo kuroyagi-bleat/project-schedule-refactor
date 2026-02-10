@@ -108,3 +108,14 @@
     - [x] `scheduler.js`: 並行工程計算ロジック修正
 - [x] 検証 (Verification)
     - [x] 動作確認 (Tests)
+
+## Phase 12: 行程の複数選択・一括移動 (Multi-Phase Reordering)
+- [ ] 実装計画 (Implementation Plan)
+    - [ ] `implementation_plan.md` 更新 (Multi-Select対応)
+- [ ] 実装 (Implementation)
+    - [ ] `state.js`: 選択状態管理 (`selectedPhases`) 追加
+    - [ ] `ui.js`: 選択操作 (Click, Shift+Click, Cmd+Click) イベント実装
+    - [ ] `ui.js`: 複数ドラッグ＆ドロップロジック実装
+    - [ ] `style.css`: 選択中・ドラッグ中のスタイル
+- [ ] 検証 (Verification)
+    - [ ] 動作確認 (Manual Test)

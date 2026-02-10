@@ -3,9 +3,10 @@
 
 
 
-import { appState, getActiveData, getActiveTimeline, saveState, addTag, deleteTag, updateTag, togglePhaseTag } from './state.js';
+import { appState, appSettings, getActiveData, getActiveTimeline, saveState, addTag, deleteTag, updateTag, togglePhaseTag, selectedPhaseIds, deletePreset, applyPreset, saveCurrentAsPreset } from './state.js';
 import { calculateSchedule, getDaysDiff } from './scheduler.js';
 import { normalizeDateStr } from './dateUtils.js';
+import { PRESETS } from './config.js';
 
 // DOM要素の参照
 let phaseListEl, resultContainerEl, anchorDateInput, holidaysInput, anchorPhaseSelect, anchorTypeRadios;
@@ -96,6 +97,11 @@ export function renderPhases() {
         row.className = 'phase-row draggable-item';
         row.dataset.idx = index;
         row.draggable = true;
+
+        // 選択状態の反映
+        if (selectedPhaseIds.has(phase.id)) {
+            row.classList.add('selected');
+        }
 
 
 
@@ -615,4 +621,48 @@ function renderPhaseTags(phase) {
         }
     });
     return html;
+}
+
+/**
+ * プリセット管理画面を描画
+ * [NEW] Phase 13
+ */
+export function renderPresetManager() {
+    const list = document.getElementById('preset-list');
+    if (!list) return;
+    list.innerHTML = '';
+
+    // 1. Default Presets (Read-only)
+    PRESETS.forEach(preset => {
+        const item = document.createElement('div');
+        item.className = 'preset-item default-preset';
+        item.innerHTML = `
+            <span class="preset-name">${escapeHtml(preset.name)} <small>(Default)</small></span>
+            <button class="btn-small apply-default-preset-btn" data-preset-name="${escapeHtml(preset.name)}">Apply</button>
+        `;
+        list.appendChild(item);
+    });
+
+    // 2. User Presets (Deletable)
+    if (appSettings.presets && appSettings.presets.length > 0) {
+        appSettings.presets.forEach((preset, index) => {
+            const item = document.createElement('div');
+            item.className = 'preset-item user-preset';
+            item.innerHTML = `
+                <span class="preset-name">${escapeHtml(preset.name)} <small>(User)</small></span>
+                <div class="preset-actions">
+                    <button class="btn-small apply-user-preset-btn" data-index="${index}">Apply</button>
+                    <button class="icon-btn delete-preset-btn" data-index="${index}">×</button>
+                </div>
+            `;
+            list.appendChild(item);
+        });
+    } else {
+        const empty = document.createElement('div');
+        empty.className = 'preset-item empty';
+        empty.textContent = 'No user presets saved.';
+        empty.style.color = '#aaa';
+        empty.style.fontStyle = 'italic';
+        list.appendChild(empty);
+    }
 }

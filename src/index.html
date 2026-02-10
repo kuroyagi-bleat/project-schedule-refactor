@@ -32,8 +32,7 @@
 
                 <button id="undo-btn" class="icon-btn" title="Undo (Ctrl+Z)">↩</button>
                 <button id="redo-btn" class="icon-btn" title="Redo (Ctrl+Shift+Z)">↪</button>
-                <button id="save-btn" class="btn-secondary">Save</button>
-                <button id="load-btn" class="btn-secondary">Load</button>
+
                 <button id="settings-toggle-btn" class="icon-btn" title="Settings">⚙</button>
                 <input type="file" id="file-input" accept=".json" style="display:none">
             </div>
@@ -41,23 +40,61 @@
 
         <!-- SETTINGS PANEL (Hidden by default) -->
         <div id="global-settings-panel" class="settings-panel" style="display:none;">
-            <div class="settings-content">
-                <h3>Settings</h3>
-                <div class="form-group">
-                    <label>祝日・休日 (YYYY-MM-DD)</label>
-                    <span class="form-hint">※土日は自動で除外</span>
-                    <textarea id="holidays-input" placeholder="2024-12-31&#10;2025-01-01"></textarea>
+            <div class="settings-container">
+                <!-- Environment Settings -->
+                <div class="settings-section">
+                    <div class="settings-header-row">
+                        <h3>環境Settings</h3>
+                        <div class="settings-actions">
+                            <button id="export-settings-btn" class="btn-secondary btn-small">Save (Env)</button>
+                            <button id="import-settings-btn" class="btn-secondary btn-small">Load (Env)</button>
+                            <input type="file" id="settings-file-input" accept=".json" style="display:none">
+                        </div>
+                    </div>
+
+                    <div class="settings-grid-2col">
+                        <div class="settings-col">
+                            <label>祝日・休日 (YYYY-MM-DD)</label>
+                            <span class="form-hint">※土日は自動で除外</span>
+                            <textarea id="holidays-input" placeholder="2024-12-31&#10;2025-01-01"></textarea>
+                        </div>
+
+                        <div class="settings-col">
+                            <label>工程プリセット (Presets)</label>
+                            <div class="preset-controls">
+                                <div class="preset-add-form" style="display:flex; gap:0.5rem; width:100%;">
+                                    <input type="text" id="new-preset-name" placeholder="現在の状態を保存名" style="flex:1;">
+                                    <button id="save-preset-btn" class="btn-small">現在の状態を保存</button>
+                                </div>
+                            </div>
+                            <div id="preset-list" class="preset-list">
+                                <!-- Presets rendered here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group" style="margin-top:2rem;">
-                    <label>タグ管理 (Global Tags)</label>
-                    <div id="tag-manager-list" class="tag-manager-list">
-                        <!-- Tag items will be rendered here -->
+                <hr class="settings-divider">
+
+                <!-- Project Settings -->
+                <div class="settings-section">
+                    <div class="settings-header-row">
+                        <h3>個別Settings</h3>
+                        <div class="settings-actions">
+                            <button id="save-btn" class="btn-secondary btn-small">Save (Project)</button>
+                            <button id="load-btn" class="btn-secondary btn-small">Load (Project)</button>
+                        </div>
                     </div>
-                    <div class="tag-add-form">
-                        <input type="text" id="new-tag-name" placeholder="New Tag Name" style="width:150px;">
-                        <input type="color" id="new-tag-color" value="#38bdf8" class="color-picker">
-                        <button id="add-tag-btn" class="btn-small">Add</button>
+                    <p class="form-hint" style="margin-top:-10px; margin-bottom:10px;">※スケジュールはこちらに含まれます</p>
+
+                    <div class="settings-col">
+                        <label>タグ管理 (Global Tags)</label>
+                        <div id="tag-manager-list" class="tag-manager-list"></div>
+                        <div class="tag-add-form">
+                            <input type="text" id="new-tag-name" placeholder="New Tag Name" style="width:150px;">
+                            <input type="color" id="new-tag-color" value="#38bdf8" class="color-picker">
+                            <button id="add-tag-btn" class="btn-small">Add</button>
+                        </div>
                     </div>
                 </div>
             </div>

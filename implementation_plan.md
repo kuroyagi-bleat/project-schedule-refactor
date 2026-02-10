@@ -1,34 +1,55 @@
-# 並行工程の営業日考慮 (Parallel Phase Business Days)
+# Phase 15: 設定パネルのレイアウト改善
 
-## Goal Description
-並行工程（Parallel Phase）の日数計算において、現在は単純な「暦日（カレンダー通りの日数）」の差分を計算しているため、土日祝日が含まれてしまい、実際の「営業日」数と乖離が生じる問題を修正する。
-具体的には、開始日と終了日の間の営業日のみをカウントするロジックを導入する。
+## 目的
+設定パネル (`#global-settings-panel`) のレイアウトを整理し、環境設定（祝日・プリセット）と個別設定（スケジュール・タグ）を明確に分離する。
+また、ヘッダー上の「Save」「Load」ボタンをパネル内に移動し、操作動線を設定パネル内に集約する。
 
-## User Review Required
-> [!NOTE]
-> この変更により、既存の並行工程の日数が減る可能性があります（土日祝が含まれていた分が除外されるため）。
+## 変更概要
 
-## Proposed Changes
+### 1. `index.html`
+- ヘッダー (`.header-actions`) から `save-btn` と `load-btn` を削除し、設定パネル内に移動。
+- 設定パネルの構造を `display: grid` を用いた2段構成に変更。
 
-### [dateUtils.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/dateUtils.js)
-#### [MODIFY] dateUtils.js
-- `getBusinessDaysDiff(startDate, endDate)` 関数を追加
-    - 開始日と終了日の間の営業日数をカウントする
-    - `isWorkingDay` を利用して判定
+```html
+<div class="settings-container">
+  <!-- Section 1: 環境設定 (Environment) -->
+  <section class="settings-group env-settings">
+    <header>
+      <h3>環境Settings</h3>
+      <div class="actions">
+        <!-- Settings Export/Import -->
+        <button id="export-settings-btn">Save (Env)</button>
+        <button id="import-settings-btn">Load (Env)</button>
+      </div>
+    </header>
+    <div class="grid-2-col">
+      <div class="col-holidays">...</div>
+      <div class="col-presets">...</div>
+    </div>
+  </section>
 
-### [scheduler.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/scheduler.js)
-#### [MODIFY] scheduler.js
-- `processParallel` 関数内の `getDaysDiff` 呼び出しを `getBusinessDaysDiff` に変更
+  <hr class="settings-divider">
 
-## Verification Plan
+  <!-- Section 2: 個別設定 (Project) -->
+  <section class="settings-group proj-settings">
+    <header>
+      <h3>個別Settings</h3>
+      <div class="actions">
+        <!-- Project Save/Load (Moved from Header) -->
+        <button id="save-btn">Save (Project)</button>
+        <button id="load-btn">Load (Project)</button>
+      </div>
+    </header>
+    <div class="col-tags">...</div>
+  </section>
+</div>
+```
 
-### Automated Tests
-- なし（現状のテストフレームワークがないため）
+### 2. `style.css`
+- パネル幅の調整 (`max-width` の見直し、または `width: fit-content` 等)
+- セクション間の境界線 (`border-bottom` or `hr`)
+- グリッドレイアウト定義
 
-### Manual Verification
-1. `http://localhost:8080/src/` を開く
-2. 新規フェーズを作成し、「並行」チェックを入れる
-3. 開始日を金曜日、終了日を翌週月曜日に設定（土日を挟む）
-    - **Before**: 4日間と表示される（金・土・日・月）
-    - **After**: 2日間と表示される（金・月）
-4. 祝日を含む期間でテストを行い、祝日が除外されることを確認
+## 影響範囲
+- UIのみの変更。ロジック変更なし。
+- `main.js` のイベントリスナーはID指定のため、HTML構造変更後も動作するはずだが確認が必要。
