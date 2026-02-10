@@ -1,66 +1,55 @@
-<!-- Approved -->
-> **Approved by**: User
-> **Date**: 2026-02-11
-> **Phase**: Plan
+# Phase 15: 設定パネルのレイアウト改善
 
-# プリセット機能 (Phase Presets)
+## 目的
+設定パネル (`#global-settings-panel`) のレイアウトを整理し、環境設定（祝日・プリセット）と個別設定（スケジュール・タグ）を明確に分離する。
+また、ヘッダー上の「Save」「Load」ボタンをパネル内に移動し、操作動線を設定パネル内に集約する。
 
-## Goal Description
-ユーザーがよく使う工程パターン（例：「標準開発」「アジャイル」など）をプリセットとして保存・読み込みできるようにする。
-また、祝日設定やプリセット等の「環境設定」と、プロジェクト固有の「スケジュールデータ」を分離し、管理しやすくする。
+## 変更概要
 
-## User Review Required
-> [!IMPORTANT]
-> **データ構造の変更**:
-> これまで `appState` に混在していた「祝日設定(`globalHolidays`)」を「環境設定(`appSettings`)」として分離します。
-> これにより、**プロジェクトデータをリセットしても祝日設定やプリセットは保持される**ようになります。
+### 1. `index.html`
+- ヘッダー (`.header-actions`) から `save-btn` と `load-btn` を削除し、設定パネル内に移動。
+- 設定パネルの構造を `display: grid` を用いた2段構成に変更。
 
-> [!NOTE]
-> **プリセットの適用**:
-> プリセットの適用は**「新規作成（全クリア）」または「上書き」**として動作します。既存の工程に追加する機能は今回は実装しません。
+```html
+<div class="settings-container">
+  <!-- Section 1: 環境設定 (Environment) -->
+  <section class="settings-group env-settings">
+    <header>
+      <h3>環境Settings</h3>
+      <div class="actions">
+        <!-- Settings Export/Import -->
+        <button id="export-settings-btn">Save (Env)</button>
+        <button id="import-settings-btn">Load (Env)</button>
+      </div>
+    </header>
+    <div class="grid-2-col">
+      <div class="col-holidays">...</div>
+      <div class="col-presets">...</div>
+    </div>
+  </section>
 
-## Proposed Changes
+  <hr class="settings-divider">
 
-### [state.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/state.js)
-#### [MODIFY] state.js
-- `appSettings` オブジェクトを新設 ( `{ globalHolidays: [], presets: [] }` )。
-- `saveSettings` / `loadSettings` 関数を追加（LocalStorageキー: `project-scheduler-settings`）。
-- `appState` から `globalHolidays` を削除し、`appSettings` 側を参照するように Getter を調整。
-- プリセット操作関数を追加:
-    - `saveCurrentAsPreset(name)`: 現在の `activeTimeline` のフェーズリストをプリセットとして保存。
-    - `deletePreset(index)`: プリセットを削除。
-    - `applyPreset(index)`: 指定したプリセットで現在のタイムラインを上書き。
+  <!-- Section 2: 個別設定 (Project) -->
+  <section class="settings-group proj-settings">
+    <header>
+      <h3>個別Settings</h3>
+      <div class="actions">
+        <!-- Project Save/Load (Moved from Header) -->
+        <button id="save-btn">Save (Project)</button>
+        <button id="load-btn">Load (Project)</button>
+      </div>
+    </header>
+    <div class="col-tags">...</div>
+  </section>
+</div>
+```
 
-### [ui.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/ui.js)
-#### [MODIFY] ui.js
-- **設定パネル (`global-settings-panel`) の拡張**:
-    - 「設定エクスポート/インポート」ボタンを追加。
-    - 「プリセット管理」セクションを追加:
-        - [登録] ボタン: 現在の工程を名前をつけて保存。
-        - 保存済みプリセットリスト（適用ボタン、削除ボタン付き）。
+### 2. `style.css`
+- パネル幅の調整 (`max-width` の見直し、または `width: fit-content` 等)
+- セクション間の境界線 (`border-bottom` or `hr`)
+- グリッドレイアウト定義
 
-### [main.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/main.js)
-#### [MODIFY] main.js
-- `attachTopListeners`:
-    - 設定のエクスポート/インポート処理を追加。
-    - `importJson`: 読み込んだJSONが「プロジェクトデータ」か「設定データ」かを判別して処理を分岐。
-
-### [config.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/config.js)
-#### [MODIFY] config.js
-- デフォルトのプリセットデータ（標準的なウォーターフォールなど）を定義。
-
-## Verification Plan
-
-### Manual Verification
-1.  **データ分離**:
-    - 祝日を設定後、ページをリロードして保持されているか確認。
-    - 「プロジェクトデータ」を削除（または新規スプリント作成）しても、祝日設定が残っているか確認。
-2.  **プリセット保存**:
-    - 独自の工程を作成し、「プリセットとして保存」する。
-    - リストに表示されるか確認。
-3.  **プリセット適用**:
-    - 新しいスプリントを作成し、保存したプリセットを「適用」する。
-    - 正しく工程が展開されるか確認。
-4.  **インポート/エクスポート**:
-    - 「設定データ」をエクスポートする。
-    - ブラウザのデータをクリアした後、エクスポートしたファイルをインポートし、祝日とプリセットが復元されるか確認。
+## 影響範囲
+- UIのみの変更。ロジック変更なし。
+- `main.js` のイベントリスナーはID指定のため、HTML構造変更後も動作するはずだが確認が必要。
