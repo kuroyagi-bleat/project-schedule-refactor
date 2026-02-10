@@ -60,6 +60,29 @@
                         <button id="add-tag-btn" class="btn-small">Add</button>
                     </div>
                 </div>
+
+                <div class="form-group" style="margin-top:2rem; border-top: 1px solid #334155; padding-top: 1rem;">
+                    <label>工程プリセット (Presets)</label>
+                    <div class="preset-controls" style="margin-bottom: 0.5rem;">
+                        <div class="preset-add-form" style="display:flex; gap:0.5rem;">
+                            <input type="text" id="new-preset-name" placeholder="現在の状態を保存名" style="flex:1;">
+                            <button id="save-preset-btn" class="btn-small">現在の状態を保存</button>
+                        </div>
+                    </div>
+                    <div id="preset-list" class="preset-list">
+                        <!-- Presets rendered here -->
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:2rem; border-top: 1px solid #334155; padding-top: 1rem;">
+                    <label>環境設定データ (Settings Data)</label>
+                    <span class="form-hint">※祝日とプリセットのみ（プロジェクトデータは含まれません）</span>
+                    <div style="display:flex; gap:10px; margin-top:0.5rem;">
+                        <button id="export-settings-btn" class="btn-secondary btn-small">Export Settings (JSON)</button>
+                        <button id="import-settings-btn" class="btn-secondary btn-small">Import Settings (JSON)</button>
+                        <input type="file" id="settings-file-input" accept=".json" style="display:none">
+                    </div>
+                </div>
             </div>
         </div>
 

@@ -3,11 +3,12 @@
 // Phase 1: コード基盤整備
 // Phase 3: Undo/Redo + キーボードショートカット
 
-import { CONFIG, createDefaultTimelineData } from './config.js';
+import { CONFIG, createDefaultTimelineData, PRESETS } from './config.js';
 import {
     appState, saveState, loadState, getActiveTimeline, getActiveData,
     addTag, updateTag, deleteTag, togglePhaseTag,
-    selectPhase, deselectPhase, clearSelection, togglePhaseSelection, getSelectedPhaseIds, setSelection, selectedPhaseIds
+    selectPhase, deselectPhase, clearSelection, togglePhaseSelection, getSelectedPhaseIds, setSelection, selectedPhaseIds,
+    saveCurrentAsPreset, applyPreset, deletePreset // [NEW]
 } from './state.js';
 import {
     bindDOMElements,
@@ -19,7 +20,8 @@ import {
     replaceWithClone,
     renderTagManager, // [NEW]
     renderTagFilter,  // [NEW]
-    openTagSelectionModal // [NEW]
+    openTagSelectionModal, // [NEW]
+    renderPresetManager // [NEW]
 } from './ui.js';
 
 import { renderGantt, setScheduleUpdateCallback } from './gantt.js';
@@ -214,6 +216,7 @@ function renderAll() {
     updateUndoRedoButtons();
     renderTagManager(); // [NEW]
     renderTagFilter(); // [NEW]
+    renderPresetManager(); // [NEW]
 }
 
 /**
@@ -732,6 +735,106 @@ function attachTopListeners() {
             renderPhases();
             renderSchedule();
             renderGantt();
+        });
+    }
+
+    // [NEW] Preset Management
+    const savePresetBtn = document.getElementById('save-preset-btn');
+    if (savePresetBtn) {
+        savePresetBtn.addEventListener('click', () => {
+            const nameInput = document.getElementById('new-preset-name');
+            const name = nameInput.value.trim();
+            if (!name) {
+                alert('プリセット名を入力してください');
+                return;
+            }
+            saveCurrentAsPreset(name);
+            nameInput.value = '';
+            renderPresetManager();
+            alert(`プリセット "${name}" を保存しました`);
+        });
+    }
+
+    const presetList = document.getElementById('preset-list');
+    if (presetList) {
+        presetList.addEventListener('click', (e) => {
+            if (e.target.classList.contains('apply-default-preset-btn')) {
+                const name = e.target.dataset.presetName;
+                const preset = PRESETS.find(p => p.name === name);
+                if (preset && confirm(`プリセット "${name}" を適用しますか？\n現在のスケジュールは上書きされます。`)) {
+                    const activeData = getActiveData();
+                    activeData.phases = JSON.parse(JSON.stringify(preset.phases));
+                    activeData.phases.forEach(p => {
+                        p.id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+                    });
+                    saveState();
+                    pushHistory(appState);
+                    renderPhases();
+                    updateSchedule();
+                    alert(`プリセット "${name}" を適用しました`);
+                }
+            } else if (e.target.classList.contains('apply-user-preset-btn')) {
+                const idx = parseInt(e.target.dataset.index);
+                if (confirm('このプリセットを適用しますか？\n現在のスケジュールは上書きされます。')) {
+                    applyPreset(idx);
+                    pushHistory(appState);
+                    renderPhases();
+                    updateSchedule();
+                    alert('プリセットを適用しました');
+                }
+            } else if (e.target.classList.contains('delete-preset-btn')) {
+                const idx = parseInt(e.target.dataset.index);
+                if (confirm('このプリセットを削除しますか？')) {
+                    deletePreset(idx);
+                    renderPresetManager();
+                }
+            }
+        });
+    }
+
+    // [NEW] Settings Export/Import
+    const exportSettingsBtn = document.getElementById('export-settings-btn');
+    if (exportSettingsBtn) {
+        exportSettingsBtn.addEventListener('click', () => {
+            const settings = localStorage.getItem('project-scheduler-settings');
+            if (!settings) {
+                alert('設定データがありません');
+                return;
+            }
+            const blob = new Blob([settings], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `scheduler-settings-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        });
+    }
+
+    const importSettingsBtn = document.getElementById('import-settings-btn');
+    const settingsFileInput = document.getElementById('settings-file-input');
+    if (importSettingsBtn && settingsFileInput) {
+        importSettingsBtn.addEventListener('click', () => settingsFileInput.click());
+        settingsFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const data = JSON.parse(ev.target.result);
+                    if (data.globalHolidays || data.presets) {
+                        localStorage.setItem('project-scheduler-settings', JSON.stringify(data));
+                        loadState();
+                        renderAll();
+                        alert('設定をインポートしました');
+                    } else {
+                        alert('無効な設定ファイルです');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('インポートに失敗しました');
+                }
+            };
+            reader.readAsText(file);
         });
     }
 }
