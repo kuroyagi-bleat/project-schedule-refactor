@@ -944,6 +944,9 @@ function initUI() {
     updateSchedule();
     updateTopControls();
     updateUndoRedoButtons();
+    renderTagManager(); // [FIX] Added missing render
+    renderTagFilter();  // [FIX] Added missing render
+    renderPresetManager(); // [FIX] Added missing render
 
     // イベントリスナーは初回のみ登録
     if (!listenersAttached) {
