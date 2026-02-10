@@ -47,6 +47,52 @@
 - [x] 5. レスポンシブ対応
 - [ ] ~~6. ダークモード/ライトモード切替~~ → 見送り（Phase 5スコープ外）
 
+## Phase 7: 行程へのタグ機能 (Tagging)
+- [x] 要件定義・設計 (Requirements & Design)
+    - [x] `docs/requirements.md` 更新
+    - [x] `docs/design.md` 更新
+- [x] 実装計画 (Implementation Plan)
+    - [x] `implementation_plan.md` 作成
+- [x] 実装 (Implementation)
+    - [x] データ構造変更 (`state.js`)
+    - [x] UI実装 (`ui.js`, `styles.css`)
+    - [x] フィルタリング機能実装
+- [x] 検証 (Verification)
+    - [x] 動作確認 (Monkey Test)
+    - [x] ドキュメント更新 (`walkthrough.md`, `task.md`, `test_plan.md`)
+- [x] 追加修正 (Fixes)
+    - [x] Phase Steps 日付同期バグの修正 (inputイベント対応)
+
+## Phase 8: タグ表示のUI最適化 (UI Refinement)
+- [x] 実装計画 (Implementation Plan)
+    - [x] `implementation_plan.md` 作成
+- [x] 実装 (Implementation)
+    - [x] `ui.js`: 日付入力の縦並び化、タグ表示エリアの常設
+    - [x] `style.css`: レイアウト調整
+- [x] 検証 (Verification)
+    - [x] 動作確認
+
+## Phase 10: 基準日入力のフェーズ行内統合 (Inline Anchor Editing)
+- [x] 実装計画 (Implementation Plan)
+    - [x] `implementation_plan.md` 作成
+- [x] 実装 (Implementation)
+    - [x] `index.html`: ヘッダーの基準日入力削除
+    - [x] `ui.js`: アンカーフェーズの日付入力有効化と連携処理
+- [x] 検証 (Verification)
+    - [x] 動作確認 (バグ修正含む)
+
+## Phase 9: タグフィルタ位置の変更 (Layout Adjustment)
+- [x] 実装計画 (Implementation Plan)
+    - [x] `implementation_plan.md` 作成
+- [x] 実装 (Implementation)
+    - [x] `index.html`: タグフィルタの移動
+    - [x] `style.css`: スタイル調整
+- [x] 検証 (Verification)
+    - [x] 動作確認
+
+
+
+
 ## Phase 6: Chrome拡張機能化 (Extension)
 - [x] manifest.json 作成
 - [x] アイコン作成・配置
