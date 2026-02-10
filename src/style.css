@@ -932,3 +932,43 @@ button:hover {
     opacity: 0.4;
     cursor: grabbing;
 }
+
+/* ===================================
+   PRESET MANAGER
+   =================================== */
+.preset-controls {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+}
+
+.preset-list {
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: var(--space-xs);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.preset-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-xs) var(--space-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.preset-item:last-child {
+    border-bottom: none;
+}
+
+.preset-item:hover {
+    background: var(--bg-hover);
+}
+
+.preset-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
