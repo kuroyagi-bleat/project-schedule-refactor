@@ -11,10 +11,15 @@ import {
     renderSchedule,
     renderTimelineSelect,
     updateTopControls,
-    replaceWithClone
+    replaceWithClone,
+    renderTagManager, // [NEW]
+    renderTagFilter,  // [NEW]
+    openTagSelectionModal // [NEW]
 } from './ui.js';
+import { addTag } from './state.js'; // [NEW]
 import { renderGantt, setScheduleUpdateCallback } from './gantt.js';
 import { calculateSchedule } from './scheduler.js';
+import { normalizeDateStr } from './dateUtils.js';
 import { pushHistory, undo, redo, canUndo, canRedo, getHistoryState } from './history.js';
 
 // circular dependency を解決するためのコールバック設定
@@ -202,6 +207,8 @@ function renderAll() {
     renderGantt();
     updateTopControls();
     updateUndoRedoButtons();
+    renderTagManager(); // [NEW]
+    renderTagFilter(); // [NEW]
 }
 
 /**
@@ -347,10 +354,12 @@ function attachPhaseListeners() {
             saveState();
             renderSchedule();
         } else if (e.target.classList.contains('phase-days-input')) {
+            // change イベント（blur時）: 状態保存 + 全更新
             const val = parseInt(e.target.value) || 1;
             data.phases[idx].days = Math.max(1, val);
             saveState();
             updateSchedule();
+            renderPhases(); // blur後なのでフォーカス消失OK
         } else if (e.target.classList.contains('phase-parallel-chk')) {
             const phase = data.phases[idx];
             phase.isParallel = e.target.checked;
@@ -371,6 +380,18 @@ function attachPhaseListeners() {
                 }
                 saveState();
                 updateSchedule();
+                renderPhases();
+            } else {
+                // アンカーフェーズの日付変更（インライン編集）
+                const isAnchorStart = data.anchorPhaseId === phase.id && data.anchorType === 'start';
+                const isAnchorEnd = data.anchorPhaseId === phase.id && data.anchorType === 'end';
+                if ((isAnchorStart && e.target.classList.contains('phase-start-input')) ||
+                    (isAnchorEnd && e.target.classList.contains('phase-end-input'))) {
+                    data.anchorDate = e.target.value;
+                    saveState();
+                    updateSchedule();
+                    renderPhases(); // 全工程の日付を更新
+                }
             }
         } else if (e.target.classList.contains('anchor-start-radio') || e.target.classList.contains('anchor-end-radio')) {
             // アンカーラジオボタンの変更処理
@@ -382,6 +403,33 @@ function attachPhaseListeners() {
             renderPhases();
             updateSchedule();
             updateTopControls();
+        }
+    });
+
+    // input イベント: リアルタイム更新（フォーカス維持）
+    phaseListEl.addEventListener('input', (e) => {
+        const data = getActiveData();
+        const idx = parseInt(e.target.dataset.idx);
+
+        if (e.target.classList.contains('phase-days-input')) {
+            const val = parseInt(e.target.value) || 1;
+            data.phases[idx].days = Math.max(1, val);
+            // フォーカスを維持したまま日付だけ更新
+            const schedule = calculateSchedule(data);
+            if (schedule) {
+                const startInputs = phaseListEl.querySelectorAll('.phase-start-input');
+                const endInputs = phaseListEl.querySelectorAll('.phase-end-input');
+                schedule.forEach((s, i) => {
+                    const phase = data.phases[i];
+                    if (!phase || phase.isParallel) return;
+                    if (startInputs[i]) startInputs[i].value = normalizeDateStr(s.startDate);
+                    if (endInputs[i]) endInputs[i].value = normalizeDateStr(s.endDate);
+                });
+            }
+            updateSchedule();
+        } else if (e.target.classList.contains('phase-name-input')) {
+            data.phases[idx].name = e.target.value;
+            renderGantt();
         }
     });
 
@@ -403,6 +451,9 @@ function attachPhaseListeners() {
             saveWithHistory();
             renderPhases();
             updateSchedule();
+        } else if (e.target.closest('.tag-btn')) {
+            const idx = parseInt(e.target.closest('.tag-btn').dataset.idx);
+            openTagSelectionModal(idx);
         }
     });
 
@@ -571,41 +622,68 @@ function attachTopListeners() {
         });
     }
 
-    // 画像エクスポート
-    const exportBtn = document.getElementById('export-image-btn');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', (e) => {
-            const btn = e.target;
-            const container = document.getElementById('gantt-container');
-            if (!container || !container.firstChild) return;
-
-            const originalText = "📷 Save Image";
-            btn.innerText = '⏳ Capturing...';
-
-            if (typeof html2canvas === 'undefined') {
-                alert('ライブラリが読み込まれていません。');
-                btn.innerText = originalText;
-                return;
+    // [NEW] Tag Management
+    // Add Tag Button
+    const addTagBtn = document.getElementById('add-tag-btn');
+    if (addTagBtn) {
+        addTagBtn.addEventListener('click', () => {
+            const nameInput = document.getElementById('new-tag-name');
+            const colorInput = document.getElementById('new-tag-color');
+            if (nameInput && nameInput.value.trim()) {
+                addTag(nameInput.value.trim(), colorInput.value);
+                nameInput.value = '';
+                renderTagManager();
+                renderTagFilter();
             }
-
-            html2canvas(container.firstChild, {
-                backgroundColor: '#1e293b',
-                scale: 2
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `gantt-chart-${new Date().toISOString().split('T')[0]}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
-
-                btn.innerText = '✅ Saved!';
-                setTimeout(() => btn.innerText = originalText, 2000);
-            }).catch(err => {
-                console.error(err);
-                alert('エクスポートに失敗しました。');
-                btn.innerText = originalText;
-            });
         });
     }
+
+    // Filter Change
+    const tagFilterSelect = document.getElementById('tag-filter-select');
+    if (tagFilterSelect) {
+        tagFilterSelect.addEventListener('change', (e) => {
+            renderPhases();
+            renderSchedule();
+            renderGantt();
+        });
+    }
+}
+
+
+// 画像エクスポート
+const exportBtn = document.getElementById('export-image-btn');
+if (exportBtn) {
+    exportBtn.addEventListener('click', (e) => {
+        const btn = e.target;
+        const container = document.getElementById('gantt-container');
+        if (!container || !container.firstChild) return;
+
+        const originalText = "📷 Save Image";
+        btn.innerText = '⏳ Capturing...';
+
+        if (typeof html2canvas === 'undefined') {
+            alert('ライブラリが読み込まれていません。');
+            btn.innerText = originalText;
+            return;
+        }
+
+        html2canvas(container.firstChild, {
+            backgroundColor: '#1e293b',
+            scale: 2
+        }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `gantt-chart-${new Date().toISOString().split('T')[0]}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+
+            btn.innerText = '✅ Saved!';
+            setTimeout(() => btn.innerText = originalText, 2000);
+        }).catch(err => {
+            console.error(err);
+            alert('エクスポートに失敗しました。');
+            btn.innerText = originalText;
+        });
+    });
 }
 
 /**
