@@ -1,0 +1,29 @@
+{
+  "name": "project-schedule-refactor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "http-server . -p 8080 -c-1 -o src/index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kuroyagi-bleat/project-schedule-refactor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/kuroyagi-bleat/project-schedule-refactor/issues"
+  },
+  "homepage": "https://github.com/kuroyagi-bleat/project-schedule-refactor#readme",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

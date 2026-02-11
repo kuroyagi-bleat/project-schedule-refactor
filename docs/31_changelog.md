@@ -56,3 +56,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Removed
 - 冗長なAnchor工程選択ドロップダウン
+
+---
+
+## ドキュメント番号の意味
+
+- ファイル名先頭の番号は推奨読込順を表します。
+- 数字が小さいほど先に読む運用です。
+- `90`番台は評価・方針などの参照資料です。

@@ -8,7 +8,8 @@ import {
     appState, saveState, loadState, getActiveTimeline, getActiveData,
     addTag, updateTag, deleteTag, togglePhaseTag,
     selectPhase, deselectPhase, clearSelection, togglePhaseSelection, getSelectedPhaseIds, setSelection, selectedPhaseIds,
-    saveCurrentAsPreset, applyPreset, deletePreset // [NEW]
+    saveCurrentAsPreset, applyPreset, deletePreset, restoreState, validateTimelineData, // [NEW] validateTimelineData added
+    appSettings, saveSettings // [NEW] for holiday import
 } from './state.js';
 import {
     bindDOMElements,
@@ -118,39 +119,21 @@ function showConfirm(message) {
         // フォーカスをキャンセルボタンに（安全側）
         setTimeout(() => cancelBtn.focus(), 50);
 
-        // クリーンアップ関数
+        // キーボード操作
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                cancelBtn.click();
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+
+        // クリーンアップ関数（リスナー削除を確実に行う）
         const cleanup = () => {
+            document.removeEventListener('keydown', escHandler);
             modal.style.display = 'none';
             okBtn.onclick = null;
             cancelBtn.onclick = null;
         };
-
-        // OKボタン
-        okBtn.onclick = () => {
-            cleanup();
-            resolve(true);
-        };
-
-        // キャンセルボタン
-        cancelBtn.onclick = () => {
-            cleanup();
-            resolve(false);
-        };
-
-        // オーバーレイクリックでキャンセル
-        modal.onclick = (e) => {
-            if (e.target === modal) {
-                cancelBtn.click();
-            }
-        };
-
-        // キーボード操作
-        document.addEventListener('keydown', function escHandler(e) {
-            if (e.key === 'Escape') {
-                document.removeEventListener('keydown', escHandler);
-                cancelBtn.click();
-            }
-        });
     });
 }
 
@@ -174,33 +157,21 @@ function showAlert(message) {
         // フォーカスをOKボタンに
         setTimeout(() => okBtn.focus(), 50);
 
+        // Enterキーで閉じる
+        const keyHandler = (e) => {
+            if (e.key === 'Enter' || e.key === 'Escape') {
+                okBtn.click();
+            }
+        };
+        document.addEventListener('keydown', keyHandler);
+
         // クリーンアップ関数
         const cleanup = () => {
+            document.removeEventListener('keydown', keyHandler);
             modal.style.display = 'none';
             cancelBtn.style.display = '';  // 元に戻す
             okBtn.onclick = null;
         };
-
-        // OKボタン
-        okBtn.onclick = () => {
-            cleanup();
-            resolve();
-        };
-
-        // オーバーレイクリックでも閉じる
-        modal.onclick = (e) => {
-            if (e.target === modal) {
-                okBtn.click();
-            }
-        };
-
-        // Enterキーで閉じる
-        document.addEventListener('keydown', function keyHandler(e) {
-            if (e.key === 'Enter' || e.key === 'Escape') {
-                document.removeEventListener('keydown', keyHandler);
-                okBtn.click();
-            }
-        });
     });
 }
 
@@ -672,7 +643,7 @@ function attachTopListeners() {
                 const y = d.getFullYear();
                 const m = String(d.getMonth() + 1).padStart(2, '0');
                 const d_str = String(d.getDate()).padStart(2, '0');
-                return `${y} -${m} -${d_str} `;
+                return `${y}-${m}-${d_str}`;
             };
             list.forEach(item => {
                 text += `${fmt(item.startDate)} ~${fmt(item.endDate)}${SEPARATOR}${item.name}${SEPARATOR}${item.days} 日\n`;
@@ -693,6 +664,9 @@ function attachTopListeners() {
             if (panel) {
                 const isHidden = panel.style.display === 'none';
                 panel.style.display = isHidden ? 'block' : 'none';
+                settingsBtn.setAttribute('aria-expanded', !isHidden);
+                // アイコンの切り替え（オプション）
+                settingsBtn.classList.toggle('active', !isHidden);
             }
         });
     }
@@ -897,6 +871,20 @@ function importJson(file) {
     reader.onload = (e) => {
         try {
             const data = JSON.parse(e.target.result);
+
+            // [NEW] 祝日データの抽出と統合（旧形式 holidays / 新形式 globalHolidays）
+            const importedHolidays = data.globalHolidays || data.holidays;
+            if (importedHolidays && Array.isArray(importedHolidays) && importedHolidays.length > 0) {
+                if (confirm(`ファイル内に祝日データ(${importedHolidays.length}件)が見つかりました。\n現在の祝日設定に追加しますか？`)) {
+                    // 現在の祝日設定と統合（重複排除）
+                    const currentHolidays = appSettings.globalHolidays || [];
+                    const mergedHolidays = [...new Set([...currentHolidays, ...importedHolidays])].sort();
+                    appSettings.globalHolidays = mergedHolidays;
+                    saveSettings(); // 即保存
+                    alert('祝日設定を更新しました。設定パネルで確認できます。');
+                }
+            }
+
             if (data.timelines) {
                 Object.assign(appState, data);
                 if (!appState.globalHolidays) appState.globalHolidays = [];
@@ -904,6 +892,9 @@ function importJson(file) {
                 initUI();
             } else if (data.phases) {
                 if (confirm("古い形式のデータです。新しいタイムラインとしてインポートしますか？")) {
+                    // データの正規化（不足プロパティの補完）
+                    validateTimelineData(data);
+
                     const newId = Date.now().toString();
                     appState.timelines.push({
                         id: newId,

@@ -1,55 +1,44 @@
-# Phase 15: 設定パネルのレイアウト改善
+# Implementation Plan - Phase 17: リファクタリングとUI改善
 
-## 目的
-設定パネル (`#global-settings-panel`) のレイアウトを整理し、環境設定（祝日・プリセット）と個別設定（スケジュール・タグ）を明確に分離する。
-また、ヘッダー上の「Save」「Load」ボタンをパネル内に移動し、操作動線を設定パネル内に集約する。
+CodeXによるコードレビュー結果 (`docs/32_ui_source_review_2026-02-11.md`) に基づき、バグ修正とコード品質の向上、UIの微調整を行います。
 
-## 変更概要
+## User Review Required
+> [!IMPORTANT]
+> `src/ui.js` 内の `attachPhaseListeners` を削除します。これは `main.js` に移行済みの機能の残骸（デッドコード）であり、削除による機能影響はないはずですが、念のため各種操作（アンカー変更、日付入力など）の動作確認を入念に行います。
 
-### 1. `index.html`
-- ヘッダー (`.header-actions`) から `save-btn` と `load-btn` を削除し、設定パネル内に移動。
-- 設定パネルの構造を `display: grid` を用いた2段構成に変更。
+## Proposed Changes
 
-```html
-<div class="settings-container">
-  <!-- Section 1: 環境設定 (Environment) -->
-  <section class="settings-group env-settings">
-    <header>
-      <h3>環境Settings</h3>
-      <div class="actions">
-        <!-- Settings Export/Import -->
-        <button id="export-settings-btn">Save (Env)</button>
-        <button id="import-settings-btn">Load (Env)</button>
-      </div>
-    </header>
-    <div class="grid-2-col">
-      <div class="col-holidays">...</div>
-      <div class="col-presets">...</div>
-    </div>
-  </section>
+### P0: バグ修正 (Critical)
+#### [MODIFY] [main.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/main.js)
+- `restoreState` を `state.js` からインポートするように修正（Undo/Redo時のクラッシュ防止）。
 
-  <hr class="settings-divider">
+### P1: 保守性・品質向上 (High)
+#### [MODIFY] [main.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/main.js)
+- モーダル (`showConfirm`, `showAlert`) のイベントリスナー（keydown）が確実に削除されるようにクリーンアップ処理を強化。
+- `initUI` 等の初期化フローを再確認。
 
-  <!-- Section 2: 個別設定 (Project) -->
-  <section class="settings-group proj-settings">
-    <header>
-      <h3>個別Settings</h3>
-      <div class="actions">
-        <!-- Project Save/Load (Moved from Header) -->
-        <button id="save-btn">Save (Project)</button>
-        <button id="load-btn">Load (Project)</button>
-      </div>
-    </header>
-    <div class="col-tags">...</div>
-  </section>
-</div>
-```
+#### [MODIFY] [ui.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/ui.js)
+- 未使用の `attachPhaseListeners` 関数を削除。
 
-### 2. `style.css`
-- パネル幅の調整 (`max-width` の見直し、または `width: fit-content` 等)
-- セクション間の境界線 (`border-bottom` or `hr`)
-- グリッドレイアウト定義
+### U1-U4: UI/UX改善 (Low)
+#### [MODIFY] [index.html](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/index.html)
+- 英語・日本語が混在しているラベルを日本語に統一（例: `Save (Env)` -> `保存`）。
+- 設定パネル開閉ボタンに `aria-expanded` 属性などを追加し、状態を分かりやすくする。
 
-## 影響範囲
-- UIのみの変更。ロジック変更なし。
-- `main.js` のイベントリスナーはID指定のため、HTML構造変更後も動作するはずだが確認が必要。
+#### [MODIFY] [main.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/main.js)
+- クリップボードコピー時の日付フォーマットを `YYYY-MM-DD` (`2026-02-11`) に修正（余分なスペース削除）。
+- 設定パネル開閉時にボタンのラベルやアイコン状態を更新するロジックを追加。
+
+#### [MODIFY] [style.css](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/style.css)
+- 重複しているCSS定義（`.phase-days`, `.phase-name-input` 等）を整理・統合。
+
+## Verification Plan
+
+### Automated Tests (Browser Subagent)
+- **UI Text Check**: ボタンやラベルが日本語に統一されているか確認。
+- **Copy Text Check**: 「テキストコピー」ボタンを押し、クリップボードの内容（またはalert用のテキスト生成ロジック）が正しいフォーマットか確認。
+- **Undo/Redo**: フェーズ削除などの操作を行い、Undo/Redo がエラーなく動作するか確認。
+
+### Manual Verification
+- **Settings Panel**: 開閉ボタンの表示切り替え確認。
+- **Interaction**: デッドコード削除後も、フェーズ入力、アンカー変更、タグ操作などが正常に動くか確認。

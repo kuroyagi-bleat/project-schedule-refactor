@@ -1,9 +1,9 @@
 # project-schedule-refactor タスク
 
 ## Phase 0: 現状評価 (As-Is Analysis)
-- [x] コード品質評価 → `docs/code_quality_report.md`
-- [x] UI/UX評価 → `docs/ui_ux_report.md`
-- [x] 評価統合・方針決定 → `docs/refactoring_strategy.md`
+- [x] コード品質評価 → `docs/docs/91_code_quality_report.md`
+- [x] UI/UX評価 → `docs/docs/92_ui_ux_report.md`
+- [x] 評価統合・方針決定 → `docs/docs/90_refactoring_strategy.md`
 
 ## Phase 1: リファクタリング (Refactoring)
 - [x] コードのモジュール分割 (7ファイル)
@@ -26,7 +26,7 @@
 ## Phase 4: リリース (Release)
 - [x] GitHub登録準備
     - [x] feature/phase3 を master にマージ
-    - [x] README.md 作成
+    - [x] 02_README.md 作成
     - [x] .gitignore 確認・整備
 - [x] ドキュメント整備
     - [x] v1.1.0 タグ付け
@@ -49,23 +49,23 @@
 
 ## Phase 7: 行程へのタグ機能 (Tagging)
 - [x] 要件定義・設計 (Requirements & Design)
-    - [x] `docs/requirements.md` 更新
-    - [x] `docs/design.md` 更新
+    - [x] `docs/docs/20_requirements.md` 更新
+    - [x] `docs/docs/21_design.md` 更新
 - [x] 実装計画 (Implementation Plan)
-    - [x] `implementation_plan.md` 作成
+    - [x] `15_implementation_plan.md` 作成
 - [x] 実装 (Implementation)
     - [x] データ構造変更 (`state.js`)
     - [x] UI実装 (`ui.js`, `styles.css`)
     - [x] フィルタリング機能実装
 - [x] 検証 (Verification)
     - [x] 動作確認 (Monkey Test)
-    - [x] ドキュメント更新 (`walkthrough.md`, `task.md`, `test_plan.md`)
+    - [x] ドキュメント更新 (`walkthrough.md`, `10_task.md`, `docs/docs/30_test_plan.md`)
 - [x] 追加修正 (Fixes)
     - [x] Phase Steps 日付同期バグの修正 (inputイベント対応)
 
 ## Phase 8: タグ表示のUI最適化 (UI Refinement)
 - [x] 実装計画 (Implementation Plan)
-    - [x] `implementation_plan.md` 作成
+    - [x] `15_implementation_plan.md` 作成
 - [x] 実装 (Implementation)
     - [x] `ui.js`: 日付入力の縦並び化、タグ表示エリアの常設
     - [x] `style.css`: レイアウト調整
@@ -74,7 +74,7 @@
 
 ## Phase 10: 基準日入力のフェーズ行内統合 (Inline Anchor Editing)
 - [x] 実装計画 (Implementation Plan)
-    - [x] `implementation_plan.md` 作成
+    - [x] `15_implementation_plan.md` 作成
 - [x] 実装 (Implementation)
     - [x] `index.html`: ヘッダーの基準日入力削除
     - [x] `ui.js`: アンカーフェーズの日付入力有効化と連携処理
@@ -83,7 +83,7 @@
 
 ## Phase 9: タグフィルタ位置の変更 (Layout Adjustment)
 - [x] 実装計画 (Implementation Plan)
-    - [x] `implementation_plan.md` 作成
+    - [x] `15_implementation_plan.md` 作成
 - [x] 実装 (Implementation)
     - [x] `index.html`: タグフィルタの移動
     - [x] `style.css`: スタイル調整
@@ -102,7 +102,7 @@
 
 ## Phase 11: 並行工程の営業日考慮 (Parallel Phase Business Days)
 - [x] 実装計画 (Implementation Plan)
-    - [x] `implementation_plan.md` 作成
+    - [x] `15_implementation_plan.md` 作成
 - [x] 実装 (Implementation)
     - [x] `dateUtils.js`: `getBusinessDaysDiff` 追加
     - [x] `scheduler.js`: 並行工程計算ロジック修正
@@ -111,7 +111,7 @@
 
 ## Phase 12: 行程の複数選択・一括移動 (Multi-Phase Reordering)
 - [ ] 実装計画 (Implementation Plan)
-    - [ ] `implementation_plan.md` 更新 (Multi-Select対応)
+    - [ ] `15_implementation_plan.md` 更新 (Multi-Select対応)
 - [ ] 実装 (Implementation)
     - [ ] `state.js`: 選択状態管理 (`selectedPhases`) 追加
     - [ ] `ui.js`: 選択操作 (Click, Shift+Click, Cmd+Click) イベント実装
@@ -119,3 +119,11 @@
     - [ ] `style.css`: 選択中・ドラッグ中のスタイル
 - [ ] 検証 (Verification)
     - [ ] 動作確認 (Manual Test)
+
+---
+
+## ドキュメント番号の意味
+
+- ファイル名先頭の番号は推奨読込順を表します。
+- 数字が小さいほど先に読む運用です。
+- `90`番台は評価・方針などの参照資料です。

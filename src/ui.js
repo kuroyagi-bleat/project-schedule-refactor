@@ -325,7 +325,7 @@ export function renderTagFilter() {
 
     // 現在の選択値を保持
     const currentVal = select.value;
-    select.innerHTML = '<option value="">All Tags</option>';
+    select.innerHTML = '<option value="">全てのタグ</option>';
 
     if (appState.tags) {
         appState.tags.forEach(tag => {
@@ -363,130 +363,7 @@ function updatePhaseDateInputs() {
     });
 }
 
-export function attachPhaseListeners() {
-    const list = document.getElementById('phase-list');
-    if (!list) return;
 
-    // Anchor Date Change (Inline)
-    list.addEventListener('change', (e) => {
-        if (e.target.classList.contains('phase-start-input') || e.target.classList.contains('phase-end-input')) {
-            const idx = parseInt(e.target.dataset.idx, 10);
-            const data = getActiveData();
-            const phase = data.phases[idx];
-            if (!phase) return;
-
-            // If this input is enabled and it is NOT parallel, it must be the anchor input
-            if (!phase.isParallel) {
-                // Determine if it's start or end anchor
-                const isAnchorStart = data.anchorPhaseId === phase.id && data.anchorType === 'start';
-                const isAnchorEnd = data.anchorPhaseId === phase.id && data.anchorType === 'end';
-
-                if ((isAnchorStart && e.target.classList.contains('phase-start-input')) ||
-                    (isAnchorEnd && e.target.classList.contains('phase-end-input'))) {
-                    // Update Anchor Date Implementation
-                    data.anchorDate = normalizeDateStr(e.target.value);
-                    data.phases = calculateSchedule(); // Update state
-                    updatePhaseDateInputs(); // Update other inputs
-                    renderSchedule();
-                    renderGantt();
-                    return; // Anchor update handles re-render naturally
-                }
-            }
-        }
-    });
-
-    // Input Change (Name, Days)
-    list.addEventListener('input', (e) => {
-        if (e.target.classList.contains('phase-name-input')) {
-            const idx = parseInt(e.target.dataset.idx, 10);
-            const data = getActiveData();
-            if (data.phases[idx]) {
-                data.phases[idx].name = e.target.value;
-                // Name change only, reschedule not strictly needed but good for consistency
-                // data.phases = calculateSchedule(); 
-                // Name doesn't affect dates, so just renderGantt is enough.
-                renderGantt();
-            }
-        } else if (e.target.classList.contains('phase-days-input')) {
-            const idx = parseInt(e.target.dataset.idx, 10);
-            const data = getActiveData();
-            if (data.phases[idx]) {
-                const val = parseInt(e.target.value) || 1;
-                data.phases[idx].days = Math.max(1, val);
-                saveState();
-                updateSchedule();
-                renderPhases(); // 日付入力欄を最新値で再描画
-            }
-        }
-    });
-
-    // Checkbox / Radio / Buttons
-    list.addEventListener('change', (e) => {
-        // Parallel Checkbox
-        if (e.target.classList.contains('phase-parallel-chk')) {
-            const idx = parseInt(e.target.dataset.idx, 10);
-            const data = getActiveData();
-            if (data.phases[idx]) {
-                data.phases[idx].isParallel = e.target.checked;
-                // Parallel status change might affect anchor validity
-                if (data.phases[idx].isParallel && data.anchorPhaseId === data.phases[idx].id) {
-                    // Cannot be anchor if parallel -> logic should handle this or disable checkbox
-                    // Current UI disables anchor radio if parallel, so this is edge case
-                }
-                data.phases = calculateSchedule(); // Update state
-                renderPhases(); // Re-render to update disabled states
-                renderSchedule();
-                renderGantt();
-            }
-        }
-
-        // Anchor Radio Selection
-        if (e.target.name === 'anchor-select') {
-            const phaseId = e.target.dataset.phaseId;
-            const type = e.target.dataset.anchorType;
-            const data = getActiveData();
-
-            data.anchorPhaseId = phaseId;
-            data.anchorType = type;
-
-            data.phases = calculateSchedule(); // Update state
-            renderPhases(); // Re-render to update inputs enablement
-            renderSchedule();
-            renderGantt();
-        }
-    });
-
-    // Click Events (Tag, Delete)
-    list.addEventListener('click', (e) => {
-        // Tag Button
-        if (e.target.closest('.tag-btn')) {
-            const btn = e.target.closest('.tag-btn');
-            const idx = parseInt(btn.dataset.idx, 10);
-            openTagSelectionModal(idx);
-        }
-
-        // Delete Button
-        if (e.target.closest('.delete-btn')) {
-            const btn = e.target.closest('.delete-btn');
-            const idx = parseInt(btn.dataset.idx, 10);
-            if (confirm('この工程を削除しますか？')) {
-                const data = getActiveData();
-                data.phases.splice(idx, 1);
-
-                // If deleted phase was anchor, reset anchor
-                if (data.phases.length > 0 && !data.phases.find(p => p.id === data.anchorPhaseId)) {
-                    data.anchorPhaseId = data.phases[0].id;
-                    data.anchorType = 'end';
-                }
-
-                data.phases = calculateSchedule(); // Update state
-                renderPhases();
-                renderSchedule();
-                renderGantt();
-            }
-        }
-    });
-}
 
 /**
  * タグ管理画面を描画
@@ -660,7 +537,7 @@ export function renderPresetManager() {
     } else {
         const empty = document.createElement('div');
         empty.className = 'preset-item empty';
-        empty.textContent = 'No user presets saved.';
+        empty.textContent = '保存されたプリセットはありません';
         empty.style.color = '#aaa';
         empty.style.fontStyle = 'italic';
         list.appendChild(empty);

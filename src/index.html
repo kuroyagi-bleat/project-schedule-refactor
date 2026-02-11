@@ -33,7 +33,7 @@
                 <button id="undo-btn" class="icon-btn" title="Undo (Ctrl+Z)">↩</button>
                 <button id="redo-btn" class="icon-btn" title="Redo (Ctrl+Shift+Z)">↪</button>
 
-                <button id="settings-toggle-btn" class="icon-btn" title="Settings">⚙</button>
+                <button id="settings-toggle-btn" class="icon-btn" title="設定を開く/閉じる" aria-expanded="false">⚙</button>
                 <input type="file" id="file-input" accept=".json" style="display:none">
             </div>
         </header>
@@ -44,10 +44,10 @@
                 <!-- Environment Settings -->
                 <div class="settings-section">
                     <div class="settings-header-row">
-                        <h3>環境Settings</h3>
+                        <h3>環境設定</h3>
                         <div class="settings-actions">
-                            <button id="export-settings-btn" class="btn-secondary btn-small">Save (Env)</button>
-                            <button id="import-settings-btn" class="btn-secondary btn-small">Load (Env)</button>
+                            <button id="export-settings-btn" class="btn-secondary btn-small">設定を保存</button>
+                            <button id="import-settings-btn" class="btn-secondary btn-small">設定を読込</button>
                             <input type="file" id="settings-file-input" accept=".json" style="display:none">
                         </div>
                     </div>
@@ -60,10 +60,10 @@
                         </div>
 
                         <div class="settings-col">
-                            <label>工程プリセット (Presets)</label>
+                            <label>工程プリセット</label>
                             <div class="preset-controls">
                                 <div class="preset-add-form" style="display:flex; gap:0.5rem; width:100%;">
-                                    <input type="text" id="new-preset-name" placeholder="現在の状態を保存名" style="flex:1;">
+                                    <input type="text" id="new-preset-name" placeholder="プリセット名" style="flex:1;">
                                     <button id="save-preset-btn" class="btn-small">現在の状態を保存</button>
                                 </div>
                             </div>
@@ -79,21 +79,21 @@
                 <!-- Project Settings -->
                 <div class="settings-section">
                     <div class="settings-header-row">
-                        <h3>個別Settings</h3>
+                        <h3>プロジェクト設定</h3>
                         <div class="settings-actions">
-                            <button id="save-btn" class="btn-secondary btn-small">Save (Project)</button>
-                            <button id="load-btn" class="btn-secondary btn-small">Load (Project)</button>
+                            <button id="save-btn" class="btn-secondary btn-small">プロジェクト保存</button>
+                            <button id="load-btn" class="btn-secondary btn-small">プロジェクト読込</button>
                         </div>
                     </div>
                     <p class="form-hint" style="margin-top:-10px; margin-bottom:10px;">※スケジュールはこちらに含まれます</p>
 
                     <div class="settings-col">
-                        <label>タグ管理 (Global Tags)</label>
+                        <label>タグ管理</label>
                         <div id="tag-manager-list" class="tag-manager-list"></div>
                         <div class="tag-add-form">
-                            <input type="text" id="new-tag-name" placeholder="New Tag Name" style="width:150px;">
+                            <input type="text" id="new-tag-name" placeholder="新しいタグ名" style="width:150px;">
                             <input type="color" id="new-tag-color" value="#38bdf8" class="color-picker">
-                            <button id="add-tag-btn" class="btn-small">Add</button>
+                            <button id="add-tag-btn" class="btn-small">追加</button>
                         </div>
                     </div>
                 </div>
@@ -114,9 +114,9 @@
             <!-- LEFT: SCHEDULE RESULT -->
             <div class="card">
                 <div class="card-header">
-                    <h3>Schedule</h3>
+                    <h3>スケジュール</h3>
                     <div class="card-actions">
-                        <button id="copy-text-btn" class="btn-small">Copy</button>
+                        <button id="copy-text-btn" class="btn-small">コピー</button>
                         <button id="sort-toggle-btn" class="btn-small"><span>昇順 ↓</span></button>
                     </div>
                 </div>
@@ -127,13 +127,13 @@
             <div class="card">
                 <div class="card-header phase-steps-header">
                     <div class="phase-steps-title">
-                        <h3>Phase Steps</h3>
+                        <h3>工程一覧</h3>
                         <span id="current-sprint-name" class="sprint-name-badge"></span>
                     </div>
 
                 </div>
                 <div id="phase-list"></div>
-                <button id="add-phase-btn" class="add-btn">+ Add Step</button>
+                <button id="add-phase-btn" class="add-btn">+ 工程を追加</button>
             </div>
 
         </div>
@@ -141,12 +141,12 @@
         <!-- GANTT CHART -->
         <div class="card gantt-card">
             <div class="card-header">
-                <h3>Gantt Chart</h3>
+                <h3>ガントチャート</h3>
                 <div style="display:flex; gap:10px; margin-left: auto;">
                     <select id="tag-filter-select" class="tag-filter-select">
-                        <option value="">All Tags</option>
+                        <option value="">全てのタグ</option>
                     </select>
-                    <button id="export-image-btn" class="btn-small">Save Image</button>
+                    <button id="export-image-btn" class="btn-small">画像保存</button>
                 </div>
             </div>
             <div id="gantt-container"></div>

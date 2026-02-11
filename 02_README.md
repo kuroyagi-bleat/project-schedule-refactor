@@ -62,6 +62,40 @@ project-schedule-refactor/
 └── tests/              # テスト
 ```
 
+## ドキュメント読み込み順（プレフィックス）
+
+`.md` ファイル名の先頭番号は、推奨される読み込み順を表します。
+
+- `00`〜`09`: 日常運用で優先して読む主要ドキュメント
+- `90`〜`99`: 評価レポートや過去方針などの参照資料
+
+基本の読み順は、`00_GEMINI.md` → `01_HANDOVER.md` → `02_README.md` です。
+
+## 用途別の推奨導線
+
+### 新規参加者向け（全体把握）
+1. `00_GEMINI.md`（ルール確認）
+2. `01_HANDOVER.md`（現状と注意点）
+3. `02_README.md`（使い方と構成）
+4. `10_task.md` / `11_TODO.md`（進捗と未対応）
+
+### 実装担当向け（機能追加・改修）
+1. `00_GEMINI.md`
+2. `01_HANDOVER.md`
+3. `docs/docs/20_requirements.md`（要件）
+4. `docs/docs/21_design.md`（設計）
+5. `15_implementation_plan.md`（実装計画）
+6. `docs/docs/30_test_plan.md`（テスト観点）
+7. `10_task.md`（反映先）
+
+### レビュー担当向け（変更妥当性確認）
+1. `00_GEMINI.md`
+2. `15_implementation_plan.md`
+3. `docs/docs/20_requirements.md`
+4. `docs/docs/21_design.md`
+5. `docs/docs/30_test_plan.md`
+6. `docs/docs/31_changelog.md`
+
 ## 開発履歴
 
 ### v1.1.0
@@ -76,3 +110,11 @@ project-schedule-refactor/
 ## ライセンス
 
 MIT License
+
+---
+
+## ドキュメント番号の意味
+
+- ファイル名先頭の番号は推奨読込順を表します。
+- 数字が小さいほど先に読む運用です。
+- `90`番台は評価・方針などの参照資料です。
