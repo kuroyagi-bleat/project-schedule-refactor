@@ -127,6 +127,26 @@ function showConfirm(message) {
         };
         document.addEventListener('keydown', escHandler);
 
+        document.addEventListener('keydown', escHandler);
+
+        // [FIX] ボタンイベントの復元
+        okBtn.onclick = () => {
+            cleanup();
+            resolve(true);
+        };
+
+        cancelBtn.onclick = () => {
+            cleanup();
+            resolve(false);
+        };
+
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                cleanup();
+                resolve(false);
+            }
+        };
+
         // クリーンアップ関数（リスナー削除を確実に行う）
         const cleanup = () => {
             document.removeEventListener('keydown', escHandler);
@@ -164,6 +184,21 @@ function showAlert(message) {
             }
         };
         document.addEventListener('keydown', keyHandler);
+
+        document.addEventListener('keydown', keyHandler);
+
+        // [FIX] ボタンイベントの復元
+        okBtn.onclick = () => {
+            cleanup();
+            resolve();
+        };
+
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                cleanup();
+                resolve();
+            }
+        };
 
         // クリーンアップ関数
         const cleanup = () => {

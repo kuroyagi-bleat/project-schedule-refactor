@@ -530,10 +530,7 @@ button:hover {
     transition: all 0.2s;
 }
 
-/* Hide the old separator */
-.date-separator {
-    display: none;
-}
+
 
 /* Always visible tags container */
 .phase-tags-container {
@@ -586,10 +583,7 @@ button:hover {
     transition: color 0.15s;
 }
 
-.date-separator {
-    color: var(--text-muted);
-    font-size: var(--font-size-xs);
-}
+
 
 .phase-anchor-dates input[type="date"] {
     width: 100px;

@@ -1,44 +1,31 @@
-# Implementation Plan - Phase 17: リファクタリングとUI改善
+# Phase 18 実装計画: 重要バグ修正と残存課題対応
 
-CodeXによるコードレビュー結果 (`docs/32_ui_source_review_2026-02-11.md`) に基づき、バグ修正とコード品質の向上、UIの微調整を行います。
+## 目的 (Goal)
+`docs/33_ui_source_recheck_2026-02-12.md` で指摘された、モーダルダイアログ（`showConfirm`, `showAlert`）のイベントハンドラ欠落による操作不能バグ（P0）を修正します。
+あわせて、軽微なCSS重複（`.date-separator`）を整理します。
 
-## User Review Required
-> [!IMPORTANT]
-> `src/ui.js` 内の `attachPhaseListeners` を削除します。これは `main.js` に移行済みの機能の残骸（デッドコード）であり、削除による機能影響はないはずですが、念のため各種操作（アンカー変更、日付入力など）の動作確認を入念に行います。
+## ユーザーレビュー事項 (User Review Required)
+特になし（バグ修正のため）。
 
-## Proposed Changes
+## 変更内容 (Proposed Changes)
 
-### P0: バグ修正 (Critical)
-#### [MODIFY] [main.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/main.js)
-- `restoreState` を `state.js` からインポートするように修正（Undo/Redo時のクラッシュ防止）。
+### `src/main.js`
+- **[修正]** `showConfirm` および `showAlert` 関数内で、`okBtn` と `cancelBtn` の `onclick` イベントハンドラを復元します。
+- **[修正]** Promiseが正しく解決（resolve）され、同時にイベントリスナーのクリーンアップ（`cleanup`）が確実に実行されるようにします。
 
-### P1: 保守性・品質向上 (High)
-#### [MODIFY] [main.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/main.js)
-- モーダル (`showConfirm`, `showAlert`) のイベントリスナー（keydown）が確実に削除されるようにクリーンアップ処理を強化。
-- `initUI` 等の初期化フローを再確認。
+### `src/style.css`
+- **[リファクタリング]** 重複して定義されている `.date-separator` のスタイル定義を検索し、一つに統合します。
 
-#### [MODIFY] [ui.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/ui.js)
-- 未使用の `attachPhaseListeners` 関数を削除。
+## 検証計画 (Verification Plan)
 
-### U1-U4: UI/UX改善 (Low)
-#### [MODIFY] [index.html](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/index.html)
-- 英語・日本語が混在しているラベルを日本語に統一（例: `Save (Env)` -> `保存`）。
-- 設定パネル開閉ボタンに `aria-expanded` 属性などを追加し、状態を分かりやすくする。
+### 自動検証 (Automated Verification)
+1. **確認ダイアログ (Confirm Dialog)**:
+   - 削除操作などをトリガーしてダイアログを表示させる。
+   - 「キャンセル」をクリック -> ダイアログが閉じ、処理が中断されること。
+   - 「OK」をクリック -> ダイアログが閉じ、処理が実行されること。
+2. **アラートダイアログ (Alert Dialog)**:
+   - アラート（例: JSONエクスポート成功時など）を表示させる。
+   - 「OK」をクリック -> ダイアログが閉じること。
 
-#### [MODIFY] [main.js](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/main.js)
-- クリップボードコピー時の日付フォーマットを `YYYY-MM-DD` (`2026-02-11`) に修正（余分なスペース削除）。
-- 設定パネル開閉時にボタンのラベルやアイコン状態を更新するロジックを追加。
-
-#### [MODIFY] [style.css](file:///Users/wakaumekenji/Desktop/work/project-schedule-refactor/src/style.css)
-- 重複しているCSS定義（`.phase-days`, `.phase-name-input` 等）を整理・統合。
-
-## Verification Plan
-
-### Automated Tests (Browser Subagent)
-- **UI Text Check**: ボタンやラベルが日本語に統一されているか確認。
-- **Copy Text Check**: 「テキストコピー」ボタンを押し、クリップボードの内容（またはalert用のテキスト生成ロジック）が正しいフォーマットか確認。
-- **Undo/Redo**: フェーズ削除などの操作を行い、Undo/Redo がエラーなく動作するか確認。
-
-### Manual Verification
-- **Settings Panel**: 開閉ボタンの表示切り替え確認。
-- **Interaction**: デッドコード削除後も、フェーズ入力、アンカー変更、タグ操作などが正常に動くか確認。
+### 手動検証 (Manual Verification)
+- ブラウザ上で実際に削除ボタン等を押し、ダイアログの応答性を確認します。
